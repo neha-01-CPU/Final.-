@@ -905,56 +905,75 @@ html, body {
 .re-inner p { font-size: 0.85rem; color: var(--txt-mid); }
 .re-inner p strong { color: var(--indigo); font-weight: 900; font-size: 1rem; }
 /* ================================================================
-   NEW ENDGAME LEADERBOARD (Everyone + Top 3 Crowns)
+   GRAND HORIZONTAL PODIUM & LEADERBOARD
 ================================================================ */
 .re-scores { 
-  width: 100%; display: flex; flex-direction: column; gap: 6px; 
-  max-height: 240px; overflow-y: auto; padding: 4px;
+  width: 100%; display: flex; flex-direction: column; gap: 8px; 
 }
-.re-scores::-webkit-scrollbar { width: 4px; }
-.re-scores::-webkit-scrollbar-thumb { background: rgba(74,143,232,0.3); border-radius: 4px; }
+
+/* Horizontal Top 3 Podium */
+.podium-top3 {
+  display: flex; align-items: flex-end; justify-content: center; gap: 12px;
+  margin-top: 15px; margin-bottom: 10px;
+}
+.podium-place {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  background: rgba(255,255,255,0.6); border-radius: 16px 16px 8px 8px;
+  padding: 10px 6px; width: 85px; position: relative;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  border: 1.5px solid rgba(255,255,255,0.8);
+  animation: podiumRise 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@keyframes podiumRise {
+  from { opacity: 0; transform: translateY(50px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Dynamic heights to look like steps */
+.podium-place.rank-1 { height: 145px; background: linear-gradient(to top, rgba(244,185,66,0.3), rgba(255,255,255,0.95)); border-color: #f4b942; z-index: 3; }
+.podium-place.rank-2 { height: 115px; background: linear-gradient(to top, rgba(148,163,184,0.3), rgba(255,255,255,0.95)); border-color: #94a3b8; z-index: 2; }
+.podium-place.rank-3 { height: 95px; background: linear-gradient(to top, rgba(205,124,58,0.3), rgba(255,255,255,0.95)); border-color: #cd7c3a; z-index: 1; }
+
+/* Podium Avatars & Crowns */
+.podium-av-wrap { width: 44px; height: 44px; margin-bottom: 6px; position: relative; }
+.podium-av-wrap img { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; border: 2.5px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.podium-crown {
+  position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+  font-size: 1.7rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+  animation: crownDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s both; z-index: 10;
+}
+
+.podium-name { font-weight: 900; font-size: 0.8rem; color: var(--txt); width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.podium-pts { font-weight: 800; font-size: 0.75rem; color: var(--indigo); margin-top: 2px; }
+
+/* Vertical List for the Rest (4th place onwards) */
+.re-scores-list {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 120px; overflow-y: auto; padding: 4px;
+}
+.re-scores-list::-webkit-scrollbar { width: 4px; }
+.re-scores-list::-webkit-scrollbar-thumb { background: rgba(74,143,232,0.3); border-radius: 4px; }
 
 .re-score-row {
   display: flex; align-items: center; justify-content: space-between;
   padding: 8px 12px; border-radius: 12px;
   background: rgba(255,255,255,0.45); font-size: 0.85rem;
   animation: itemIn 0.3s var(--spring) both;
-  border: 1.5px solid transparent;
-  transition: transform 0.2s var(--spring);
 }
-.re-score-left { display: flex; align-items: center; gap: 12px; }
-
-/* Fixed Avatar Sizes so they never blow up */
-.re-score-av-wrap { position: relative; width: 34px; height: 34px; flex-shrink: 0; }
-.re-score-av { 
-  width: 100%; height: 100%; border-radius: 8px; 
-  object-fit: cover; border: 1.5px solid var(--border); 
-  background: #dde8fc; display: block; 
-}
+.re-score-left { display: flex; align-items: center; gap: 10px; }
+.re-score-rank { font-weight: 800; color: var(--txt-light); font-size: 0.75rem; width: 18px; }
+.re-score-av-wrap-small { width: 28px; height: 28px; flex-shrink: 0; }
+.re-score-av { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
 .re-score-name { font-weight: 800; color: var(--txt); }
-.re-score-pts { font-weight: 900; color: var(--indigo); }
+.re-score-pts { font-weight: 900; color: var(--txt-mid); }
 
-/* The Floating Crowns */
-.re-score-crown { 
-  position: absolute; top: -16px; left: 50%; 
-  transform: translateX(-50%) rotate(-12deg);
-  font-size: 1.25rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); 
-  z-index: 10; animation: crownDrop 0.6s var(--spring) both;
-}
-@keyframes crownDrop {
-  0% { opacity: 0; transform: translate(-50%, -20px) rotate(-35deg) scale(0.4); }
-  100% { opacity: 1; transform: translate(-50%, 0) rotate(-12deg) scale(1); }
-}
-
-/* 👑 TOP 3 SPECIAL EFFECTS 👑 */
-.re-score-row.is-top3 {
-  background: rgba(255,255,255,0.85); 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-.re-score-row.rank-1 { border-color: #f4b942; background: linear-gradient(to right, rgba(244,185,66,0.15), rgba(255,255,255,0.9)); transform: scale(1.03); }
-.re-score-row.rank-2 { border-color: #94a3b8; background: linear-gradient(to right, rgba(148,163,184,0.15), rgba(255,255,255,0.9)); transform: scale(1.015); }
-.re-score-row.rank-3 { border-color: #cd7c3a; background: linear-gradient(to right, rgba(205,124,58,0.15), rgba(255,255,255,0.9)); }
-.re-next { font-size: 0.8rem; color: var(--txt-light); font-weight: 700; }
+/* Dark mode overrides */
+html[data-theme="dark"] .podium-place { border-color: transparent; }
+html[data-theme="dark"] .podium-place.rank-1 { background: linear-gradient(to top, rgba(244,185,66,0.2), rgba(255,255,255,0.15)); border-color: #f4b942; }
+html[data-theme="dark"] .podium-place.rank-2 { background: linear-gradient(to top, rgba(148,163,184,0.2), rgba(255,255,255,0.15)); border-color: #94a3b8; }
+html[data-theme="dark"] .podium-place.rank-3 { background: linear-gradient(to top, rgba(205,124,58,0.2), rgba(255,255,255,0.15)); border-color: #cd7c3a; }
+html[data-theme="dark"] .podium-name, html[data-theme="dark"] .re-score-name { color: #fff; }
+html[data-theme="dark"] .re-score-row { background: rgba(255,255,255,0.06); }
 /* ════════════════════════════════════════════
    TOAST
 ════════════════════════════════════════════ */
