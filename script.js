@@ -508,9 +508,13 @@ function nextRound() {
 /* ════════════════════════════════════════════
    END GAME & LIQUID BUTTON INJECTION
 ════════════════════════════════════════════ */
+/* ════════════════════════════════════════════
+   END GAME & GRAND CONFETTI
+════════════════════════════════════════════ */
 function endGame() {
   clearInterval(S.timerInterval); BotManager.stop();
-  const winner = [...S.players].sort((a, b) => b.score - a.score)[0];
+  const sortedPlayers = [...S.players].sort((a, b) => b.score - a.score);
+  const winner = sortedPlayers[0];
   
   overlayRoundEnd.classList.remove('hidden'); 
   $('re-emoji').textContent = '🏆'; 
@@ -520,7 +524,26 @@ function endGame() {
   if(reWordP) reWordP.innerHTML = `Winner: <strong>${escHtml(winner.name)}</strong>`;
   
   $('re-next').style.display = 'none';
-  $('re-scores').innerHTML = [...S.players].sort((a, b) => b.score - a.score).map((p, i) => `<div class="re-score-row"><span class="re-score-name">${i===0?'🥇':i===1?'🥈':i===2?'🥉':''} ${escHtml(p.name)}</span><span class="re-score-pts">${p.score} pts</span></div>`).join('');
+
+  // Build the new Grand Podium with Avatars and Crowns
+  $('re-scores').innerHTML = sortedPlayers.map((p, i) => {
+    const isTop3 = i < 3;
+    const crownEmoji = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
+    const crownDelay = 0.5 + (i * 0.25); // Stagger the crown drops
+    
+    return `
+      <div class="re-podium-row" style="animation-delay:${i * 0.15}s">
+        <div class="re-podium-left">
+          <div class="re-podium-av-wrap">
+            ${isTop3 ? `<div class="re-podium-crown" style="animation-delay: ${crownDelay}s">${crownEmoji}</div>` : ''}
+            <img class="re-podium-av" src="${p.avatarDef}" alt="Avatar">
+          </div>
+          <span class="re-podium-name">${escHtml(p.name)}</span>
+        </div>
+        <span class="re-podium-pts">${p.score} pts</span>
+      </div>
+    `;
+  }).join('');
   
   injectGlassyStyles();
 
@@ -548,56 +571,41 @@ function endGame() {
   overlayRoundEnd.style.flexDirection = 'column';
   
   showEventPopup('🏆', `${winner.name} wins the game!`);
+
+  // 🎇 FIRE THE CONFETTI
+  fireGrandConfetti();
 }
 
-function injectGlassyStyles() {
-  if (document.getElementById('podium-liquid-styles')) return;
-  const style = document.createElement('style');
-  style.id = 'podium-liquid-styles';
-  style.textContent = `
-    .podium-btn-wrap {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 25px; 
-      z-index: 100; width: 100%; animation: btnPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
-    }
-    @keyframes btnPop { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
-    .glass-fluid-btn {
-      position: relative; overflow: hidden; padding: 14px 28px; border-radius: 100px;
-      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.05rem; color: white; cursor: pointer;
-      backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.4);
-    }
-    .glass-fluid-btn span { position: relative; z-index: 2; }
-    .glass-fluid-btn::before {
-      content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); transition: all 0.4s ease; z-index: 1;
-    }
-    .glass-fluid-btn:hover { transform: translateY(-4px) scale(1.05); }
-    .glass-fluid-btn:hover::before { left: 100%; }
-    .glass-fluid-btn:active { transform: translateY(2px) scale(0.95); }
-    .play-btn { background: linear-gradient(135deg, #4acf8a, #2ecc87); box-shadow: 0 8px 25px rgba(46,204,135,0.4), inset 0 2px 0 rgba(255,255,255,0.5); }
-    .play-btn:hover { box-shadow: 0 12px 35px rgba(46,204,135,0.6), inset 0 2px 0 rgba(255,255,255,0.6); }
-    .home-btn { background: linear-gradient(135deg, #f0525e, #cc3333); box-shadow: 0 8px 25px rgba(240,82,94,0.4), inset 0 2px 0 rgba(255,255,255,0.5); }
-    .home-btn:hover { box-shadow: 0 12px 35px rgba(240,82,94,0.6), inset 0 2px 0 rgba(255,255,255,0.6); }
-  `;
-  document.head.appendChild(style);
-}
+function fireGrandConfetti() {
+  if (typeof confetti === 'undefined') return; // Failsafe if CDN doesn't load
 
-function resetGame() {
-  overlayRoundEnd.classList.add('hidden');
-  const btnWrap = document.getElementById('podium-btns');
-  if (btnWrap) btnWrap.remove(); 
+  const duration = 6 * 1000;
+  const animationEnd = Date.now() + duration;
+  const defaults = { startVelocity: 35, spread: 360, ticks: 80, zIndex: 99999 };
 
-  S.players.forEach(p => { p.score = 0; p.guessed = false; });
-  S.round = 1; S.drawerIdx = 0; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
-  S.currentWord = ''; S.guessedIds.clear(); S.hintsFired = 0; S.history = [];
+  function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
-  roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`;
-  ctx.fillStyle = 'white'; ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-  chatMessages.innerHTML = '';
-  addChat('system', '', '🔄 New Game Started! Scores reset.');
-  
-  buildLeaderboard();
-  startWordSelection();
+  const interval = setInterval(function() {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    const particleCount = 60 * (timeLeft / duration);
+    
+    // Fire from left side
+    confetti(Object.assign({}, defaults, { 
+      particleCount,
+      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+    }));
+    
+    // Fire from right side
+    confetti(Object.assign({}, defaults, { 
+      particleCount,
+      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+    }));
+  }, 250);
 }
 
 /* ════════════════════════════════════════════
