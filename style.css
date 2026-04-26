@@ -1407,6 +1407,7 @@ html[data-theme="dark"] .chat-input {
 html[data-theme="dark"] .player-item { background: rgba(0, 0, 0, 0.4) !important; border-color: rgba(255,255,255,0.06) !important; }
 html[data-theme="dark"] .player-item:hover { background: rgba(255, 255, 255, 0.1) !important; }
 html[data-theme="dark"] .pi-name { color: #ffffff !important; }
+html[data-theme="dark"] .chat-msg.close { background: rgba(244, 185, 66, 0.15) !important; border-color: rgba(244, 185, 66, 0.3) !important; color: #fbbf24 !important; }
 html[data-theme="dark"] .chat-msg.normal { background: rgba(255, 255, 255, 0.08) !important; color: #f8fafc !important; }
 html[data-theme="dark"] .chat-msg.correct { background: rgba(16, 185, 129, 0.15) !important; border-color: rgba(16, 185, 129, 0.3) !important; color: #34d399 !important; }
 
