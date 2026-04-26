@@ -506,9 +506,6 @@ function nextRound() {
 }
 
 /* ════════════════════════════════════════════
-   END GAME & LIQUID BUTTON INJECTION
-════════════════════════════════════════════ */
-/* ════════════════════════════════════════════
    END GAME & GRAND CONFETTI
 ════════════════════════════════════════════ */
 function endGame() {
@@ -525,22 +522,21 @@ function endGame() {
   
   $('re-next').style.display = 'none';
 
-  // Build the new Grand Podium with Avatars and Crowns
+  // Build the full leaderboard, adding a special class & crown to the Top 3
   $('re-scores').innerHTML = sortedPlayers.map((p, i) => {
     const isTop3 = i < 3;
-    const crownEmoji = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
-    const crownDelay = 0.5 + (i * 0.25); // Stagger the crown drops
+    const crown = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
     
     return `
-      <div class="re-podium-row" style="animation-delay:${i * 0.15}s">
-        <div class="re-podium-left">
-          <div class="re-podium-av-wrap">
-            ${isTop3 ? `<div class="re-podium-crown" style="animation-delay: ${crownDelay}s">${crownEmoji}</div>` : ''}
-            <img class="re-podium-av" src="${p.avatarDef}" alt="Avatar">
+      <div class="re-score-row ${isTop3 ? 'is-top3 rank-' + (i + 1) : ''}" style="animation-delay:${i * 0.08}s">
+        <div class="re-score-left">
+          <div class="re-score-av-wrap">
+            ${isTop3 ? `<div class="re-score-crown">${crown}</div>` : ''}
+            <img class="re-score-av" src="${p.avatarDef}" alt="Avatar">
           </div>
-          <span class="re-podium-name">${escHtml(p.name)}</span>
+          <span class="re-score-name">${escHtml(p.name)}</span>
         </div>
-        <span class="re-podium-pts">${p.score} pts</span>
+        <span class="re-score-pts">${p.score} pts</span>
       </div>
     `;
   }).join('');
@@ -567,47 +563,42 @@ function endGame() {
   btnWrap.appendChild(playBtn);
   btnWrap.appendChild(homeBtn);
   
-  overlayRoundEnd.appendChild(btnWrap);
-  overlayRoundEnd.style.flexDirection = 'column';
+  // FIXED: Append the buttons INSIDE the glass card, not to the full screen overlay
+  document.querySelector('.re-inner').appendChild(btnWrap);
   
   showEventPopup('🏆', `${winner.name} wins the game!`);
 
-  // 🎇 FIRE THE CONFETTI
+  // 🎇 FIRE THE CONFETTI EXPLOSION
   fireGrandConfetti();
 }
 
 function fireGrandConfetti() {
-  if (typeof confetti === 'undefined') return; // Failsafe if CDN doesn't load
+  if (typeof confetti === 'undefined') return;
 
-  const duration = 6 * 1000;
-  const animationEnd = Date.now() + duration;
-  const defaults = { startVelocity: 35, spread: 360, ticks: 80, zIndex: 99999 };
+  const duration = 3000; // Explodes for exactly 3 seconds, then naturally fades/falls
+  const end = Date.now() + duration;
 
-  function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+  (function frame() {
+    confetti({
+      particleCount: 6,
+      angle: 60,
+      spread: 60,
+      origin: { x: -0.1 },
+      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6']
+    });
+    confetti({
+      particleCount: 6,
+      angle: 120,
+      spread: 60,
+      origin: { x: 1.1 },
+      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6']
+    });
 
-  const interval = setInterval(function() {
-    const timeLeft = animationEnd - Date.now();
-
-    if (timeLeft <= 0) {
-      return clearInterval(interval);
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
     }
-
-    const particleCount = 60 * (timeLeft / duration);
-    
-    // Fire from left side
-    confetti(Object.assign({}, defaults, { 
-      particleCount,
-      origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-    }));
-    
-    // Fire from right side
-    confetti(Object.assign({}, defaults, { 
-      particleCount,
-      origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-    }));
-  }, 250);
+  }());
 }
-
 /* ════════════════════════════════════════════
    CANVAS DRAWING (UNIFIED TOUCH & MOUSE) & UNDO
 ════════════════════════════════════════════ */
