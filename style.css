@@ -907,19 +907,20 @@ html, body {
 /* ================================================================
    GRAND HORIZONTAL PODIUM & LEADERBOARD
 ================================================================ */
-.re-scores { 
-  width: 100%; display: flex; flex-direction: column; gap: 8px; 
-}
+/* Widen the popup slightly so the horizontal podium fits perfectly */
+.re-inner { max-width: 440px !important; width: 95%; padding: 24px 20px; }
+
+.re-scores { width: 100%; display: flex; flex-direction: column; gap: 8px; }
 
 /* Horizontal Top 3 Podium */
 .podium-top3 {
-  display: flex; align-items: flex-end; justify-content: center; gap: 12px;
-  margin-top: 15px; margin-bottom: 10px;
+  display: flex; align-items: flex-end; justify-content: center; gap: 10px;
+  margin-top: 25px; margin-bottom: 15px; height: 160px;
 }
 .podium-place {
   display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
   background: rgba(255,255,255,0.6); border-radius: 16px 16px 8px 8px;
-  padding: 10px 6px; width: 85px; position: relative;
+  padding: 10px 6px; width: 30%; max-width: 95px; position: relative;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   border: 1.5px solid rgba(255,255,255,0.8);
   animation: podiumRise 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -930,20 +931,20 @@ html, body {
 }
 
 /* Dynamic heights to look like steps */
-.podium-place.rank-1 { height: 145px; background: linear-gradient(to top, rgba(244,185,66,0.3), rgba(255,255,255,0.95)); border-color: #f4b942; z-index: 3; }
-.podium-place.rank-2 { height: 115px; background: linear-gradient(to top, rgba(148,163,184,0.3), rgba(255,255,255,0.95)); border-color: #94a3b8; z-index: 2; }
-.podium-place.rank-3 { height: 95px; background: linear-gradient(to top, rgba(205,124,58,0.3), rgba(255,255,255,0.95)); border-color: #cd7c3a; z-index: 1; }
+.podium-place.rank-1 { height: 150px; background: linear-gradient(to top, rgba(244,185,66,0.3), rgba(255,255,255,0.95)); border-color: #f4b942; z-index: 3; }
+.podium-place.rank-2 { height: 120px; background: linear-gradient(to top, rgba(148,163,184,0.3), rgba(255,255,255,0.95)); border-color: #94a3b8; z-index: 2; }
+.podium-place.rank-3 { height: 100px; background: linear-gradient(to top, rgba(205,124,58,0.3), rgba(255,255,255,0.95)); border-color: #cd7c3a; z-index: 1; }
 
 /* Podium Avatars & Crowns */
-.podium-av-wrap { width: 44px; height: 44px; margin-bottom: 6px; position: relative; }
+.podium-av-wrap { width: 46px; height: 46px; margin-bottom: 8px; position: relative; }
 .podium-av-wrap img { width: 100%; height: 100%; border-radius: 12px; object-fit: cover; border: 2.5px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .podium-crown {
-  position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
-  font-size: 1.7rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+  position: absolute; top: -26px; left: 50%; transform: translateX(-50%);
+  font-size: 1.8rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
   animation: crownDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s both; z-index: 10;
 }
 
-.podium-name { font-weight: 900; font-size: 0.8rem; color: var(--txt); width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.podium-name { font-weight: 900; font-size: 0.82rem; color: var(--txt); width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .podium-pts { font-weight: 800; font-size: 0.75rem; color: var(--indigo); margin-top: 2px; }
 
 /* Vertical List for the Rest (4th place onwards) */
@@ -961,19 +962,43 @@ html, body {
   animation: itemIn 0.3s var(--spring) both;
 }
 .re-score-left { display: flex; align-items: center; gap: 10px; }
-.re-score-rank { font-weight: 800; color: var(--txt-light); font-size: 0.75rem; width: 18px; }
+.re-score-rank { font-weight: 800; color: var(--txt-light); font-size: 0.75rem; width: 18px; text-align: center; }
 .re-score-av-wrap-small { width: 28px; height: 28px; flex-shrink: 0; }
 .re-score-av { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
 .re-score-name { font-weight: 800; color: var(--txt); }
 .re-score-pts { font-weight: 900; color: var(--txt-mid); }
 
-/* Dark mode overrides */
-html[data-theme="dark"] .podium-place { border-color: transparent; }
-html[data-theme="dark"] .podium-place.rank-1 { background: linear-gradient(to top, rgba(244,185,66,0.2), rgba(255,255,255,0.15)); border-color: #f4b942; }
-html[data-theme="dark"] .podium-place.rank-2 { background: linear-gradient(to top, rgba(148,163,184,0.2), rgba(255,255,255,0.15)); border-color: #94a3b8; }
-html[data-theme="dark"] .podium-place.rank-3 { background: linear-gradient(to top, rgba(205,124,58,0.2), rgba(255,255,255,0.15)); border-color: #cd7c3a; }
-html[data-theme="dark"] .podium-name, html[data-theme="dark"] .re-score-name { color: #fff; }
-html[data-theme="dark"] .re-score-row { background: rgba(255,255,255,0.06); }
+/* ================================================================
+   PREMIUM GLASSMORPHISM ENDGAME BUTTONS
+================================================================ */
+.podium-btn-wrap {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; 
+  margin-top: 20px; width: 100%; z-index: 100;
+  animation: itemIn 0.5s var(--spring) 0.8s both;
+}
+.glass-fluid-btn {
+  position: relative; overflow: hidden; padding: 12px 24px; border-radius: 100px;
+  font-family: var(--f-body); font-weight: 900; font-size: 1rem; color: white; cursor: pointer;
+  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex; align-items: center; justify-content: center; 
+  border: 2px solid rgba(255,255,255,0.4); flex: 1; min-width: 130px;
+}
+.glass-fluid-btn span { position: relative; z-index: 2; }
+.glass-fluid-btn::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); 
+  transition: all 0.4s ease; z-index: 1;
+}
+.glass-fluid-btn:hover { transform: translateY(-4px) scale(1.05); }
+.glass-fluid-btn:hover::before { left: 100%; }
+.glass-fluid-btn:active { transform: translateY(2px) scale(0.95); }
+
+.play-btn { background: linear-gradient(135deg, #4acf8a, #2ecc87); box-shadow: 0 8px 25px rgba(46,204,135,0.4), inset 0 2px 0 rgba(255,255,255,0.5); }
+.play-btn:hover { box-shadow: 0 12px 35px rgba(46,204,135,0.6), inset 0 2px 0 rgba(255,255,255,0.6); }
+
+.home-btn { background: linear-gradient(135deg, #f0525e, #cc3333); box-shadow: 0 8px 25px rgba(240,82,94,0.4), inset 0 2px 0 rgba(255,255,255,0.5); }
+.home-btn:hover { box-shadow: 0 12px 35px rgba(240,82,94,0.6), inset 0 2px 0 rgba(255,255,255,0.6); }
 /* ════════════════════════════════════════════
    TOAST
 ════════════════════════════════════════════ */
@@ -1418,7 +1443,10 @@ body.keyboard-open .game-header {
   min-height: 40px !important;
   padding: 2px 10px !important;
 }
-/* Dark Mode Overrides for Leaderboard */
-html[data-theme="dark"] .re-score-row { background: rgba(255,255,255,0.06); border-color: transparent; }
-html[data-theme="dark"] .re-score-row.is-top3 { background: rgba(255,255,255,0.12); }
-html[data-theme="dark"] .re-score-name { color: #ffffff; }
+/* Dark mode overrides */
+html[data-theme="dark"] .podium-place { border-color: transparent; }
+html[data-theme="dark"] .podium-place.rank-1 { background: linear-gradient(to top, rgba(244,185,66,0.2), rgba(255,255,255,0.15)); border-color: #f4b942; }
+html[data-theme="dark"] .podium-place.rank-2 { background: linear-gradient(to top, rgba(148,163,184,0.2), rgba(255,255,255,0.15)); border-color: #94a3b8; }
+html[data-theme="dark"] .podium-place.rank-3 { background: linear-gradient(to top, rgba(205,124,58,0.2), rgba(255,255,255,0.15)); border-color: #cd7c3a; }
+html[data-theme="dark"] .podium-name, html[data-theme="dark"] .re-score-name { color: #fff; }
+html[data-theme="dark"] .re-score-row { background: rgba(255,255,255,0.06); }
