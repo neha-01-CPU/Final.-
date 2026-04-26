@@ -1,5 +1,5 @@
 /* ================================================================
-   PICAZO — script.js  v5.4 (Online Multiplayer Base)
+   PICAZO — script.js  v6.0 (Online Multiplayer Ready)
 ================================================================ */
 'use strict';
 
@@ -60,9 +60,10 @@ const PREMIUM_AVATARS = [
 ];
 
 let S = {
-  avatarIdx: 0, playerName: '', totalRounds: 3, drawTime: 45, maxPlayers: 8, hintsCount: 2, customWords: [],
-  players: [], myId: 'me', drawerIdx: 0, round: 1, currentWord: '', revealedIdx: [], guessedIds: new Set(), hintsFired: 0,
-  timeLeft: 45, timerInterval: null, wsTimerInterval: null,
+  avatarIdx: 0, playerName: '', 
+  totalRounds: 3, drawTime: 85, maxPlayers: 8, hintsCount: 2, customWords: [],
+  players: [], myId: 'me', drawerIdx: 0, round: 1, turnsThisRound: 0, currentWord: '', revealedIdx: [], guessedIds: new Set(), hintsFired: 0,
+  timeLeft: 85, timerInterval: null, wsTimerInterval: null,
   isDrawing: false, tool: 'pencil', color: '#000000', brushSize: 3, strokes: [], isDrawer: false,
   isMuted: false, ctxTarget: null, dpr: window.devicePixelRatio || 1, history: []
 };
@@ -81,11 +82,7 @@ const contextMenu = $('context-menu'), ctxName = $('ctx-name'), ctxPts = $('ctx-
 const avImg = $('av-img'); 
 
 document.addEventListener('DOMContentLoaded', () => { 
-   /* ════════════════════════════════════════════
-     THEME MANAGER
-  ════════════════════════════════════════════ */
   const themeCheckboxes = document.querySelectorAll('.theme-checkbox');
-  
   function applyTheme(isDark) {
     if (isDark) {
       document.documentElement.setAttribute('data-theme', 'dark');
@@ -97,13 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     themeCheckboxes.forEach(cb => cb.checked = isDark);
   }
 
-  if (localStorage.getItem('picazo-theme') === 'dark') {
-    applyTheme(true);
-  }
-
-  themeCheckboxes.forEach(cb => {
-    cb.addEventListener('change', (e) => applyTheme(e.target.checked));
-  });
+  if (localStorage.getItem('picazo-theme') === 'dark') applyTheme(true);
+  themeCheckboxes.forEach(cb => { cb.addEventListener('change', (e) => applyTheme(e.target.checked)); });
 
   const overlays = ['overlay-waiting', 'overlay-word-select', 'overlay-round-end'];
   overlays.forEach(id => {
@@ -141,7 +133,13 @@ setAvatar(0);
 $('btn-play').addEventListener('click', () => {
   const name = $('inp-name').value.trim();
   if (!name) { $('inp-name').classList.add('shake'); setTimeout(() => $('inp-name').classList.remove('shake'), 500); return; }
-  S.playerName = name; S.totalRounds = 3; S.drawTime = 45; 
+  
+  // Apply Public Lobby Defaults
+  S.playerName = name; 
+  S.totalRounds = 3; 
+  S.drawTime = 85; 
+  S.maxPlayers = 8;
+  
   transitionToGame();
 });
 
@@ -152,6 +150,7 @@ $('btn-start-private').addEventListener('click', () => {
   S.playerName = $('inp-name').value.trim() || 'Host';
   S.totalRounds = +$('priv-rounds').value;
   S.drawTime = +$('priv-time').value;
+  S.maxPlayers = +$('priv-players').value;
   const roomCode = Math.random().toString(36).substr(2, 6).toUpperCase();
   $('priv-link-txt').textContent = `https://picazo.game/r/${roomCode}`;
   $('priv-invite-box').classList.remove('hidden');
@@ -221,27 +220,70 @@ function setupMobileLayout() {
 window.addEventListener('resize', () => { setupMobileLayout(); resizeCanvas(); });
 
 /* ════════════════════════════════════════════
-   GAME INIT & LEADERBOARD 
+   GAME INIT & ONLINE READY HOOKS
 ════════════════════════════════════════════ */
 function initGame() {
   S.players = [{ id: S.myId, name: S.playerName, avatarDef: PREMIUM_AVATARS[S.avatarIdx], score: 0, isSelf: true, guessed: false }];
-  S.drawerIdx = 0;
-  setupToolbar(); setupChat(); setupContextMenu();
-  initCanvas();
+  S.drawerIdx = 0; S.round = 1; S.turnsThisRound = 0;
+  
+  setupToolbar(); setupChat(); setupContextMenu(); initCanvas();
   
   timerNum.textContent = S.drawTime; 
-  tFg.style.strokeDashoffset = '0';
-  tFg.setAttribute('class', 't-fg');
+  tFg.style.strokeDashoffset = '0'; tFg.setAttribute('class', 't-fg');
   timerNum.className = 'timer-num';
 
+  // Enter waiting state for online multiplayer
   $('overlay-waiting').classList.remove('hidden');
-  addChat('system', '', '📡 Waiting for players to join...');
-  S.round = 1; S.drawerIdx = 0; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
-  roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`;
+  $('wait-title').textContent = 'Waiting for players...';
+  $('wait-sub').textContent = 'Need at least 2 players to start.';
+  $('invite-box-wait').classList.remove('hidden');
+  
+  addChat('system', '', `📡 Connected to lobby. (1/${S.maxPlayers})`);
+  roundBadge.textContent = `Round 1/${S.totalRounds}`;
   buildLeaderboard();
   
-  setTimeout(() => { $('overlay-waiting').classList.add('hidden'); showEventPopup('🎮', 'Game started!'); startWordSelection(); }, 2000);
+  // NOTE: The game will naturally hang here until the backend calls window.addNetworkPlayer()
 }
+
+// 🌐 BACKEND HOOK: Call this from your WebSocket when someone joins!
+window.addNetworkPlayer = function(id, name, avatarDef) {
+  if (S.players.length >= S.maxPlayers) return;
+  
+  S.players.push({ id, name, avatarDef, score: 0, isSelf: false, guessed: false });
+  buildLeaderboard();
+  addChat('system', '', `👋 ${name} joined! (${S.players.length}/${S.maxPlayers})`);
+  showToast(`👋 ${name} joined!`, 't-info');
+
+  const isWaiting = !$('overlay-waiting').classList.contains('hidden');
+  if (S.players.length >= 2 && isWaiting) {
+     $('wait-title').textContent = 'Players found!';
+     $('wait-sub').textContent = 'Starting game...';
+     setTimeout(() => {
+       $('overlay-waiting').classList.add('hidden');
+       showEventPopup('🎮', 'Game started!');
+       startWordSelection();
+     }, 2500);
+  }
+};
+
+// 🌐 BACKEND HOOK: Call this from your WebSocket when someone leaves!
+window.removeNetworkPlayer = function(id) {
+  const idx = S.players.findIndex(p => p.id === id);
+  if (idx === -1) return;
+  const name = S.players[idx].name;
+  S.players.splice(idx, 1);
+  buildLeaderboard();
+  addChat('system', '', `🚪 ${name} left.`);
+
+  // Fallback to waiting room if too few players remain
+  if (S.players.length < 2 && $('overlay-waiting').classList.contains('hidden')) {
+     clearInterval(S.timerInterval);
+     clearInterval(S.wsTimerInterval);
+     $('overlay-waiting').classList.remove('hidden');
+     $('wait-title').textContent = 'Not enough players';
+     $('wait-sub').textContent = 'Waiting for more players to join...';
+  }
+};
 
 function buildLeaderboard() {
   const sorted = [...S.players].sort((a, b) => b.score - a.score);
@@ -256,9 +298,7 @@ function buildLeaderboard() {
     avWrap.className = 'pi-av';
     const avImgList = document.createElement('img');
     avImgList.src = p.avatarDef;
-    avImgList.style.width = '100%'; 
-    avImgList.style.height = '100%'; 
-    avImgList.style.objectFit = 'cover';
+    avImgList.style.width = '100%'; avImgList.style.height = '100%'; avImgList.style.objectFit = 'cover';
     avWrap.appendChild(avImgList);
     
     li.innerHTML = `<div class="pi-rank ${rankClass}">${rank === 0 ? '🥇' : rank === 1 ? '🥈' : rank === 2 ? '🥉' : (rank + 1)}</div>`;
@@ -275,13 +315,20 @@ function buildLeaderboard() {
 }
 
 /* ════════════════════════════════════════════
-   TIMER & WORDS
+   TIMER & SLOW RANDOM HINTS
 ════════════════════════════════════════════ */
 function startRoundTimer() {
   S.timeLeft = S.drawTime; clearInterval(S.timerInterval); updateTimerUI();
+  S.hintsFired = 0;
+  
   S.timerInterval = setInterval(() => {
     S.timeLeft--;
-    if (S.timeLeft <= 30 && S.timeLeft > 0 && S.timeLeft % 10 === 0) revealHintLetter();
+    
+    // Slow Hints: Trigger dynamically at exactly 50% and 25% of the total time
+    if (S.timeLeft === Math.floor(S.drawTime * 0.5) || S.timeLeft === Math.floor(S.drawTime * 0.25)) {
+      revealHintLetter();
+    }
+    
     if (S.timeLeft <= 15 && S.timeLeft > 0) playTickSound();
     updateTimerUI();
     if (S.timeLeft <= 0) { clearInterval(S.timerInterval); endRound(false); }
@@ -338,7 +385,7 @@ function startWordSelection() {
     $('ws-timer-bar').style.transition = 'width 1s linear'; $('ws-timer-bar').style.width = (t/15*100)+'%';
     if (t <= 0) { clearInterval(S.wsTimerInterval); chooseWord(choices[0].w); }
   }, 1000);
-} // <--- THIS WAS THE MISSING BRACKET!
+} 
 
 function chooseWord(word) {
   clearInterval(S.wsTimerInterval); overlayWordSelect.classList.add('hidden');
@@ -368,15 +415,18 @@ function renderWordBlanks() {
 function revealHintLetter() {
   if (S.hintsFired >= S.hintsCount) return;
   const unrevealed = S.currentWord.split('').map((_,i) => i).filter(i => !S.revealedIdx.includes(i));
-  if (unrevealed.length <= 1) return;
+  if (unrevealed.length <= 1) return; // Leave at least 1 blank
   S.revealedIdx.push(unrevealed[Math.floor(Math.random() * unrevealed.length)]);
   S.hintsFired++; renderWordBlanks();
   showToast('💡 Hint letter revealed!', 't-info');
 }
 
+/* ════════════════════════════════════════════
+   TRUE ROUND LOGIC (Everyone Draws Once per Round)
+════════════════════════════════════════════ */
 function endRound(allGuessed = false) {
   clearInterval(S.timerInterval);
-  addChat('system', '', `⏰ Round over! Word was: "${S.currentWord}"`);
+  addChat('system', '', `⏰ Turn over! Word was: "${S.currentWord}"`);
   
   const oldBtnWrap = document.getElementById('podium-btns');
   if (oldBtnWrap) oldBtnWrap.style.display = 'none';
@@ -388,7 +438,7 @@ function endRound(allGuessed = false) {
 
   const sorted = [...S.players].sort((a, b) => b.score - a.score);
   $('re-emoji').textContent = allGuessed ? '🎉' : '⏰'; 
-  $('re-title').textContent = allGuessed ? 'Everyone guessed!' : 'Round Over!'; 
+  $('re-title').textContent = allGuessed ? 'Everyone guessed!' : 'Turn Over!'; 
   
   const reWordP = document.getElementById('re-word');
   if(reWordP) reWordP.innerHTML = `The word was: <strong>${S.currentWord}</strong>`;
@@ -397,11 +447,13 @@ function endRound(allGuessed = false) {
   
   overlayRoundEnd.classList.remove('hidden');
 
-  const isLastTurn = S.round >= S.totalRounds;
+  // Check if every player has drawn, and if this was the final round
+  const isLastTurn = (S.round >= S.totalRounds) && (S.turnsThisRound >= S.players.length - 1);
+  
   $('re-next').style.display = '';
   $('re-next').innerHTML = isLastTurn 
     ? `Game Over in <span id="re-countdown">4</span>s...` 
-    : `Next round in <span id="re-countdown">4</span>s...`;
+    : `Next turn in <span id="re-countdown">4</span>s...`;
   
   let cd = 4; 
   const cdInt = setInterval(() => { 
@@ -422,10 +474,21 @@ function endRound(allGuessed = false) {
 }
 
 function nextRound() {
-  S.round++; 
-  S.drawerIdx = (S.drawerIdx + 1) % S.players.length; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
-  roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`; S.currentWord = ''; buildLeaderboard();
-  addChat('system', '', `🔄 Round ${S.round} — ${S.players[S.drawerIdx].name} draws!`); startWordSelection();
+  S.turnsThisRound++;
+  
+  // If everyone has drawn, increment the actual Round number
+  if (S.turnsThisRound >= S.players.length) {
+    S.round++;
+    S.turnsThisRound = 0;
+  }
+
+  S.drawerIdx = (S.drawerIdx + 1) % S.players.length; 
+  S.isDrawer = S.players[S.drawerIdx].id === S.myId;
+  roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`; 
+  S.currentWord = ''; buildLeaderboard();
+  
+  addChat('system', '', `🔄 Turn ${S.turnsThisRound + 1} — ${S.players[S.drawerIdx].name} draws!`); 
+  startWordSelection();
 }
 
 function resetGame() {
@@ -434,7 +497,7 @@ function resetGame() {
   if (btnWrap) btnWrap.remove(); 
 
   S.players.forEach(p => { p.score = 0; p.guessed = false; });
-  S.round = 1; S.drawerIdx = 0; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
+  S.round = 1; S.turnsThisRound = 0; S.drawerIdx = 0; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
   S.currentWord = ''; S.guessedIds.clear(); S.hintsFired = 0; S.history = [];
 
   roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`;
@@ -443,7 +506,15 @@ function resetGame() {
   addChat('system', '', '🔄 New Game Started! Scores reset.');
   
   buildLeaderboard();
-  startWordSelection();
+  
+  // Only start automatically if players are still in the room
+  if (S.players.length >= 2) {
+    startWordSelection();
+  } else {
+    $('overlay-waiting').classList.remove('hidden');
+    $('wait-title').textContent = 'Waiting for players...';
+    $('wait-sub').textContent = 'Need at least 2 players to start.';
+  }
 }
 
 /* ════════════════════════════════════════════
