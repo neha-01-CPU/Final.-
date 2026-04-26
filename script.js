@@ -717,8 +717,8 @@ function sendGuess() {
   if (S.isDrawer || S.guessedIds.has(S.myId)) { addChat('normal', S.playerName, val); return; }
 
   const guess = val.toLowerCase().trim(), word = (S.currentWord || '').toLowerCase().trim();
+  
   if (word && guess === word) {
-    
     const pts = Math.floor((S.timeLeft / S.drawTime) * 400) + 100;
     
     const me = S.players.find(p => p.isSelf);
@@ -736,6 +736,16 @@ function sendGuess() {
     
     const nonDrawers = S.players.filter(p => p.id !== S.players[S.drawerIdx]?.id);
     if (nonDrawers.every(p => p.guessed)) { clearInterval(S.timerInterval); setTimeout(() => endRound(true), 800); }
+    
+  } else if (word && guess.length > 2) {
+    // 🔍 CLOSE GUESS DETECTION
+    const threshold = word.length <= 5 ? 1 : 2;
+    if (getEditDistance(guess, word) <= threshold) {
+      addChat('normal', S.playerName, val);
+      addChat('close', '', `🤏 '${val}' is very close!`);
+    } else {
+      addChat('normal', S.playerName, val);
+    }
   } else {
     addChat('normal', S.playerName, val);
   }
