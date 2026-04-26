@@ -690,7 +690,11 @@ function setupToolbar() {
    CHAT, CONTEXT MENUS & UTILS
 ════════════════════════════════════════════ */
 function setupChat() {
-  // Add this right below setupChat()
+  btnChatSend.addEventListener('click', sendGuess);
+  chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendGuess(); } });
+}
+
+// 🧮 LEVENSHTEIN DISTANCE (Must be outside setupChat so sendGuess can use it!)
 function getEditDistance(a, b) {
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
@@ -708,12 +712,10 @@ function getEditDistance(a, b) {
   }
   return matrix[b.length][a.length];
 }
-   btnChatSend.addEventListener('click', sendGuess);
-  chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendGuess(); } });
-}
 
 function sendGuess() {
   const val = chatInput.value.trim(); if (!val) return; chatInput.value = '';
+  
   if (S.isDrawer || S.guessedIds.has(S.myId)) { addChat('normal', S.playerName, val); return; }
 
   const guess = val.toLowerCase().trim(), word = (S.currentWord || '').toLowerCase().trim();
@@ -753,10 +755,8 @@ function sendGuess() {
 
 function addChat(type, name, text) {
   const div = document.createElement('div'); 
-  // Determine which CSS class to apply based on the type
   div.className = 'chat-msg ' + (type === 'correct' ? 'correct' : type === 'system' ? 'system' : type === 'close' ? 'close' : 'normal');
   
-  // Format the inner HTML (hide the player name for system and close messages)
   div.innerHTML = (type === 'system' || type === 'close') 
     ? `<span class="msg-text">${escHtml(text)}</span>` 
     : `<span class="msg-name">${escHtml(name)}:</span> <span class="msg-text">${escHtml(text)}</span>`;
@@ -764,8 +764,7 @@ function addChat(type, name, text) {
   chatMessages.appendChild(div); chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-$('btn-mute').addEventListener('click', () => {
-  S.isMuted = !S.isMuted;
+$('btn-mute').addEventListener('click', () => {  S.isMuted = !S.isMuted;
   $('mute-icon').innerHTML = S.isMuted ? `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>` : `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>`;
 });
 
