@@ -480,7 +480,8 @@ function endRound(allGuessed = false) {
   $('re-next').innerHTML = isLastTurn 
     ? `Game Over in <span id="re-countdown">4</span>s...` 
     : `Next round in <span id="re-countdown">4</span>s...`;
-  
+
+   
   let cd = 4; 
   const cdInt = setInterval(() => { 
     cd--; 
@@ -506,7 +507,7 @@ function nextRound() {
 }
 
 /* ════════════════════════════════════════════
-   END GAME & GRAND CONFETTI
+   END GAME & GRAND CONFETTI (Horizontal Podium)
 ════════════════════════════════════════════ */
 function endGame() {
   clearInterval(S.timerInterval); BotManager.stop();
@@ -522,84 +523,103 @@ function endGame() {
   
   $('re-next').style.display = 'none';
 
-  // Build the full leaderboard, adding a special class & crown to the Top 3
-  $('re-scores').innerHTML = sortedPlayers.map((p, i) => {
-    const isTop3 = i < 3;
-    const crown = i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '';
-    
-    return `
-      <div class="re-score-row ${isTop3 ? 'is-top3 rank-' + (i + 1) : ''}" style="animation-delay:${i * 0.08}s">
+  // 1. Separate Top 3 and the Rest
+  const top3 = sortedPlayers.slice(0, 3);
+  const rest = sortedPlayers.slice(3);
+
+  // 2. Build Horizontal Podium (Order: 2nd, 1st, 3rd)
+  let podiumHTML = '<div class="podium-top3">';
+  const order = [1, 0, 2]; // 1st place in the middle
+  
+  order.forEach(idx => {
+    const p = top3[idx];
+    if (p) {
+      const rank = idx + 1;
+      const crown = rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉';
+      podiumHTML += `
+        <div class="podium-place rank-${rank}" style="animation-delay: ${idx * 0.15}s">
+          <div class="podium-crown">${crown}</div>
+          <div class="podium-av-wrap"><img src="${p.avatarDef}" alt="Avatar"></div>
+          <div class="podium-name">${escHtml(p.name)}</div>
+          <div class="podium-pts">${p.score}</div>
+        </div>
+      `;
+    }
+  });
+  podiumHTML += '</div>';
+
+  // 3. Build Vertical List for the rest
+  let restHTML = '<div class="re-scores-list">';
+  rest.forEach((p, i) => {
+    restHTML += `
+      <div class="re-score-row" style="animation-delay:${0.5 + (i * 0.08)}s">
         <div class="re-score-left">
-          <div class="re-score-av-wrap">
-            ${isTop3 ? `<div class="re-score-crown">${crown}</div>` : ''}
-            <img class="re-score-av" src="${p.avatarDef}" alt="Avatar">
-          </div>
+          <span class="re-score-rank">#${i + 4}</span>
+          <div class="re-score-av-wrap-small"><img class="re-score-av" src="${p.avatarDef}" alt="Avatar"></div>
           <span class="re-score-name">${escHtml(p.name)}</span>
         </div>
         <span class="re-score-pts">${p.score} pts</span>
       </div>
     `;
-  }).join('');
-  
-  injectGlassyStyles();
+  });
+  restHTML += '</div>';
 
+  // Output all players to the score container
+  $('re-scores').innerHTML = podiumHTML + restHTML;
+
+  // 4. Safely Inject Play Again & Home Buttons
   let oldBtnWrap = document.getElementById('podium-btns');
   if (oldBtnWrap) oldBtnWrap.remove(); 
 
-  const btnWrap = document.createElement('div');
-  btnWrap.id = 'podium-btns';
-  btnWrap.className = 'podium-btn-wrap';
-
-  const playBtn = document.createElement('button');
-  playBtn.innerHTML = '<span>🔄 Play Again</span>';
-  playBtn.className = 'glass-fluid-btn play-btn';
-  playBtn.onclick = () => resetGame();
-
-  const homeBtn = document.createElement('button');
-  homeBtn.innerHTML = '<span>🏠 Home</span>';
-  homeBtn.className = 'glass-fluid-btn home-btn';
-  homeBtn.onclick = () => location.reload(); 
-
-  btnWrap.appendChild(playBtn);
-  btnWrap.appendChild(homeBtn);
+  const buttonsHTML = `
+    <div id="podium-btns" class="podium-btn-wrap">
+      <button class="glass-fluid-btn play-btn" onclick="resetGame()"><span>🔄 Play Again</span></button>
+      <button class="glass-fluid-btn home-btn" onclick="location.reload()"><span>🏠 Home</span></button>
+    </div>
+  `;
   
-  // FIXED: Append the buttons INSIDE the glass card, not to the full screen overlay
-  document.querySelector('.re-inner').appendChild(btnWrap);
-  
+  $('re-scores').insertAdjacentHTML('afterend', buttonsHTML);
+  injectGlassyStyles();
   showEventPopup('🏆', `${winner.name} wins the game!`);
 
-  // 🎇 FIRE THE CONFETTI EXPLOSION
+  // 5. Fire Massive Confetti Explosion
   fireGrandConfetti();
 }
 
 function fireGrandConfetti() {
-  if (typeof confetti === 'undefined') return;
+  if (typeof confetti === 'undefined') {
+    console.error("Confetti script not loaded!");
+    return;
+  }
 
-  const duration = 3000; // Explodes for exactly 3 seconds, then naturally fades/falls
+  const duration = 4500; // 4.5 seconds of non-stop explosion
   const end = Date.now() + duration;
 
   (function frame() {
+    // Fire from left edge
     confetti({
-      particleCount: 6,
+      particleCount: 10,
       angle: 60,
-      spread: 60,
-      origin: { x: -0.1 },
-      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6']
+      spread: 80,
+      origin: { x: 0, y: 0.8 },
+      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
+      zIndex: 99999
     });
+    // Fire from right edge
     confetti({
-      particleCount: 6,
+      particleCount: 10,
       angle: 120,
-      spread: 60,
-      origin: { x: 1.1 },
-      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6']
+      spread: 80,
+      origin: { x: 1, y: 0.8 },
+      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
+      zIndex: 99999
     });
 
     if (Date.now() < end) {
       requestAnimationFrame(frame);
     }
   }());
-}
-/* ════════════════════════════════════════════
+}/* ════════════════════════════════════════════
    CANVAS DRAWING (UNIFIED TOUCH & MOUSE) & UNDO
 ════════════════════════════════════════════ */
 function initCanvas() {
