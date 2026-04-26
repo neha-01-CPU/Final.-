@@ -1392,17 +1392,17 @@ html[data-theme="dark"] .canvas-wrap {
 /* 5. Inputs and Lobby text */
 html[data-theme="dark"] .name-input,
 html[data-theme="dark"] .setting-sel,
-html[data-theme="dark"] .custom-words-input,
-html[data-theme="dark"] .chat-input {
+html[data-theme="dark"] .custom-words-input {
   background: rgba(0, 0, 0, 0.5) !important;
   color: #ffffff !important;
   border-color: rgba(255,255,255,0.2) !important;
 }
-html[data-theme="dark"] .name-input::placeholder,
-html[data-theme="dark"] .chat-input::placeholder {
-  color: #64748b !important;
-}
 
+/* Keep chat input transparent so it blends into the glass pill */
+html[data-theme="dark"] .chat-input {
+  background: transparent !important;
+  color: #ffffff !important;
+}
 /* 6. Player Items & Chat Bubbles */
 html[data-theme="dark"] .player-item { background: rgba(0, 0, 0, 0.4) !important; border-color: rgba(255,255,255,0.06) !important; }
 html[data-theme="dark"] .player-item:hover { background: rgba(255, 255, 255, 0.1) !important; }
