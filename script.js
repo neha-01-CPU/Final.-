@@ -123,76 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ════════════════════════════════════════════
-   BOT MANAGER
-════════════════════════════════════════════ */
-const BotManager = {
-  botIntervals: [], names: ["Alex", "Jamie", "Taylor"],
-  initBots: function() {
-    for(let i=0; i<3; i++) {
-      S.players.push({ 
-        id: 'bot_'+i, 
-        name: this.names[i] + ' (Bot)', 
-        avatarDef: PREMIUM_AVATARS[(i+5)%PREMIUM_AVATARS.length], 
-        score: 0, isSelf: false, guessed: false, isBot: true 
-      });
-    }
-  },
-  stop: function() { this.botIntervals.forEach(clearInterval); this.botIntervals.forEach(clearTimeout); this.botIntervals = []; },
-  startWordSelect: function(choices) {
-    this.stop();
-    if (!S.isDrawer) {
-      const t = setTimeout(() => { chooseWord(choices[Math.floor(Math.random() * choices.length)].w); }, 3000);
-      this.botIntervals.push(t);
-    }
-  },
-  startRound: function() {
-    this.stop();
-    if (!S.isDrawer) {
-      let angle = 0;
-      const drawInt = setInterval(() => {
-        if (S.timeLeft <= 0) return;
-        const cx = gameCanvas.width / (2 * S.dpr), cy = gameCanvas.height / (2 * S.dpr), r = 30 + Math.random() * 40;
-        const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
-        ctx.fillStyle = COLORS[Math.floor(Math.random() * 5 + 4)];
-        ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
-        angle += 0.8;
-      }, 300);
-      this.botIntervals.push(drawInt);
-    }
-    const guessInt = setInterval(() => {
-      if (S.timeLeft <= 0) return;
-      const nonDrawers = S.players.filter(p => p.id !== S.players[S.drawerIdx].id && !p.guessed);
-      if (nonDrawers.length === 0) return;
-      const bot = nonDrawers[Math.floor(Math.random() * nonDrawers.length)];
-      if (!bot.isBot) return; 
-      
-      const rand = Math.random();
-      if (rand < 0.15 && S.currentWord) {
-        bot.guessed = true;
-        
-        const pts = Math.floor((S.timeLeft / S.drawTime) * 400) + 100;
-        bot.score += pts;
-
-        if (S.players[S.drawerIdx]) {
-          S.players[S.drawerIdx].score += 50;
-        }
-
-        addChat('correct', bot.name, `🎉 Guessed the word!`);
-        showToast(`✅ ${bot.name} guessed it!`, 't-correct');
-        buildLeaderboard();
-        
-        const allNon = S.players.filter(p => p.id !== S.players[S.drawerIdx].id);
-        if (allNon.every(p => p.guessed)) { clearInterval(S.timerInterval); setTimeout(() => endRound(true), 800); }
-      } else if (rand < 0.40) {
-        const gibberish = ["tree", "house", "car", "dog?", "sun", "cloud", "is it a bird?"];
-        addChat('normal', bot.name, gibberish[Math.floor(Math.random() * gibberish.length)]);
-      }
-    }, 1800);
-    this.botIntervals.push(guessInt);
-  }
-};
-
-/* ════════════════════════════════════════════
    LOBBY & PRIVATE ROOM
 ════════════════════════════════════════════ */
 function setAvatar(i) {
@@ -292,10 +222,9 @@ window.addEventListener('resize', () => { setupMobileLayout(); resizeCanvas(); }
 
 /* ════════════════════════════════════════════
    GAME INIT & LEADERBOARD 
-════════════════════════════════════════════ */
-function initGame() {
+════════════════════════════════════════════ */function initGame() {
   S.players = [{ id: S.myId, name: S.playerName, avatarDef: PREMIUM_AVATARS[S.avatarIdx], score: 0, isSelf: true, guessed: false }];
-  BotManager.initBots(); S.drawerIdx = 0;
+  S.drawerIdx = 0;
   setupToolbar(); setupChat(); setupContextMenu();
   initCanvas();
   
@@ -305,7 +234,7 @@ function initGame() {
   timerNum.className = 'timer-num';
 
   $('overlay-waiting').classList.remove('hidden');
-  addChat('system', '', '🎨 Bot Test Mode Activated.');
+  addChat('system', '', '📡 Waiting for players to join...');
   S.round = 1; S.drawerIdx = 0; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
   roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`;
   buildLeaderboard();
@@ -408,8 +337,7 @@ function startWordSelection() {
     $('ws-timer-bar').style.transition = 'width 1s linear'; $('ws-timer-bar').style.width = (t/15*100)+'%';
     if (t <= 0) { clearInterval(S.wsTimerInterval); chooseWord(choices[0].w); }
   }, 1000);
-  BotManager.startWordSelect(choices);
-}
+
 
 function chooseWord(word) {
   clearInterval(S.wsTimerInterval); overlayWordSelect.classList.add('hidden');
@@ -417,7 +345,6 @@ function chooseWord(word) {
   addChat('system', '', `${S.players[S.drawerIdx].name} is drawing! 🖊️`);
   ctx.fillStyle = 'white'; ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
   S.history = []; 
-  BotManager.startRound();
 }
 
 function renderWordBlanks() {
@@ -447,7 +374,7 @@ function revealHintLetter() {
 }
 
 function endRound(allGuessed = false) {
-  clearInterval(S.timerInterval); BotManager.stop();
+  clearInterval(S.timerInterval);
   addChat('system', '', `⏰ Round over! Word was: "${S.currentWord}"`);
   
   const oldBtnWrap = document.getElementById('podium-btns');
@@ -782,7 +709,7 @@ function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&
    END GAME & FULL SCREEN EXPLOSION
 ════════════════════════════════════════════ */
 function endGame() {
-  clearInterval(S.timerInterval); BotManager.stop();
+  clearInterval(S.timerInterval); 
   const sortedPlayers = [...S.players].sort((a, b) => b.score - a.score);
   const winner = sortedPlayers[0];
   
