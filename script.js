@@ -94,16 +94,13 @@ document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.removeAttribute('data-theme');
       localStorage.setItem('picazo-theme', 'light');
     }
-    // Visually sync all toggle buttons
     themeCheckboxes.forEach(cb => cb.checked = isDark);
   }
 
-  // Init from localStorage
   if (localStorage.getItem('picazo-theme') === 'dark') {
     applyTheme(true);
   }
 
-  // Listeners
   themeCheckboxes.forEach(cb => {
     cb.addEventListener('change', (e) => applyTheme(e.target.checked));
   });
@@ -173,11 +170,9 @@ const BotManager = {
       if (rand < 0.15 && S.currentWord) {
         bot.guessed = true;
         
-        // 🔥 NEW: Dynamic Scoring for Bots
         const pts = Math.floor((S.timeLeft / S.drawTime) * 400) + 100;
         bot.score += pts;
 
-        // 🔥 NEW: Reward the Artist when a bot guesses!
         if (S.players[S.drawerIdx]) {
           S.players[S.drawerIdx].score += 50;
         }
@@ -250,7 +245,7 @@ function transitionToGame() {
 }
 
 /* ════════════════════════════════════════════
-   MOBILE LAYOUT (WITH GLOBAL PILL INPUT)
+   MOBILE LAYOUT
 ════════════════════════════════════════════ */
 function setupMobileLayout() {
   const isMobile = window.innerWidth < 768;
@@ -458,7 +453,6 @@ function endRound(allGuessed = false) {
   const oldBtnWrap = document.getElementById('podium-btns');
   if (oldBtnWrap) oldBtnWrap.style.display = 'none';
   
-  // 🔥 NEW: Announce total Artist earnings at the end of the round!
   if (S.guessedIds.size > 0 && S.players[S.drawerIdx]) {
     const totalArtistBonus = S.guessedIds.size * 50;
     addChat('system', '', `🎨 ${S.players[S.drawerIdx].name} earned +${totalArtistBonus} pts for drawing well!`);
@@ -480,8 +474,7 @@ function endRound(allGuessed = false) {
   $('re-next').innerHTML = isLastTurn 
     ? `Game Over in <span id="re-countdown">4</span>s...` 
     : `Next round in <span id="re-countdown">4</span>s...`;
-
-   
+  
   let cd = 4; 
   const cdInt = setInterval(() => { 
     cd--; 
@@ -499,6 +492,7 @@ function endRound(allGuessed = false) {
     } 
   }, 1000);
 }
+
 function nextRound() {
   S.round++; 
   S.drawerIdx = (S.drawerIdx + 1) % S.players.length; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
@@ -506,8 +500,25 @@ function nextRound() {
   addChat('system', '', `🔄 Round ${S.round} — ${S.players[S.drawerIdx].name} draws!`); startWordSelection();
 }
 
+function resetGame() {
+  overlayRoundEnd.classList.add('hidden');
+  const btnWrap = document.getElementById('podium-btns');
+  if (btnWrap) btnWrap.remove(); 
 
-}/* ════════════════════════════════════════════
+  S.players.forEach(p => { p.score = 0; p.guessed = false; });
+  S.round = 1; S.drawerIdx = 0; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
+  S.currentWord = ''; S.guessedIds.clear(); S.hintsFired = 0; S.history = [];
+
+  roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`;
+  ctx.fillStyle = 'white'; ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+  chatMessages.innerHTML = '';
+  addChat('system', '', '🔄 New Game Started! Scores reset.');
+  
+  buildLeaderboard();
+  startWordSelection();
+}
+
+/* ════════════════════════════════════════════
    CANVAS DRAWING (UNIFIED TOUCH & MOUSE) & UNDO
 ════════════════════════════════════════════ */
 function initCanvas() {
@@ -534,7 +545,6 @@ function resizeCanvas() {
 
   gameCanvas.width = W * S.dpr; 
   gameCanvas.height = H * S.dpr;
-  // WE NO LONGER SET INLINE STYLES. CSS WIDTH:100% WILL HANDLE IT.
   
   ctx.scale(S.dpr, S.dpr); 
   ctx.lineCap = 'round'; 
@@ -561,7 +571,6 @@ function getXY(e) {
     cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY;
   }
   
-  // Exact mathematical ratio to reach absolute edges
   const scaleX = (gameCanvas.width / S.dpr) / r.width;
   const scaleY = (gameCanvas.height / S.dpr) / r.height;
   
@@ -693,16 +702,14 @@ function sendGuess() {
   const guess = val.toLowerCase().trim(), word = (S.currentWord || '').toLowerCase().trim();
   if (word && guess === word) {
     
-    // 🔥 NEW: High-Octane Dynamic Scoring (100 to 500 pts based on speed)
     const pts = Math.floor((S.timeLeft / S.drawTime) * 400) + 100;
     
     const me = S.players.find(p => p.isSelf);
     if (me) { me.score += pts; me.guessed = true; }
     S.guessedIds.add(S.myId);
     
-    // 🔥 NEW: Give points to the Artist instantly
     if (S.players[S.drawerIdx]) {
-      S.players[S.drawerIdx].score += 50; // 50 pts per person who guesses
+      S.players[S.drawerIdx].score += 50; 
     }
 
     addChat('correct', S.playerName, `🎉 Guessed the word! (+${pts} pts)`);
@@ -770,6 +777,7 @@ function floatPoints(text, x, y) {
 
 function shuffled(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
 /* ════════════════════════════════════════════
    END GAME & FULL SCREEN EXPLOSION
 ════════════════════════════════════════════ */
@@ -779,7 +787,6 @@ function endGame() {
   const winner = sortedPlayers[0];
   
   overlayRoundEnd.classList.remove('hidden'); 
-  // Ensure the overlay stacks elements vertically
   overlayRoundEnd.style.flexDirection = 'column'; 
   
   $('re-emoji').textContent = '🏆'; 
@@ -790,13 +797,11 @@ function endGame() {
   
   $('re-next').style.display = 'none';
 
-  // 1. Separate Top 3 and the Rest
   const top3 = sortedPlayers.slice(0, 3);
   const rest = sortedPlayers.slice(3);
 
-  // 2. Build Horizontal Podium (Order: 2nd, 1st, 3rd)
   let podiumHTML = '<div class="podium-top3">';
-  const order = [1, 0, 2]; // 1st place in the middle
+  const order = [1, 0, 2];
   
   order.forEach(idx => {
     const p = top3[idx];
@@ -815,7 +820,6 @@ function endGame() {
   });
   podiumHTML += '</div>';
 
-  // 3. Build Vertical List for the rest
   let restHTML = '<div class="re-scores-list">';
   rest.forEach((p, i) => {
     restHTML += `
@@ -833,7 +837,6 @@ function endGame() {
 
   $('re-scores').innerHTML = podiumHTML + restHTML;
 
-  // 4. Inject Premium Glowing Buttons OUTSIDE the card
   let oldBtnWrap = document.getElementById('podium-btns');
   if (oldBtnWrap) oldBtnWrap.remove(); 
 
@@ -854,11 +857,9 @@ function endGame() {
   btnWrap.appendChild(playBtn);
   btnWrap.appendChild(homeBtn);
   
-  // Attach to the overlay so they float outside the white card!
   overlayRoundEnd.appendChild(btnWrap);
   showEventPopup('🏆', `${winner.name} wins the game!`);
 
-  // 5. Fire Massive Full-Screen Confetti Explosion
   fireGrandConfetti();
 }
 
@@ -868,7 +869,6 @@ function fireGrandConfetti() {
   const duration = 4000; 
   const end = Date.now() + duration;
 
-  // MASSIVE INITIAL CENTER BURST (The full screen explosion!)
   confetti({
     particleCount: 250,
     spread: 360,
@@ -878,7 +878,6 @@ function fireGrandConfetti() {
     zIndex: 99999
   });
 
-  // Continuous overlapping cannons
   (function frame() {
     confetti({
       particleCount: 10,
