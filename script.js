@@ -1,5 +1,5 @@
 /* ================================================================
-   PICAZO — script.js  v5.4 (Edge-to-Edge Canvas Fix)
+   PICAZO — script.js  v5.4 (Online Multiplayer Base)
 ================================================================ */
 'use strict';
 
@@ -222,7 +222,8 @@ window.addEventListener('resize', () => { setupMobileLayout(); resizeCanvas(); }
 
 /* ════════════════════════════════════════════
    GAME INIT & LEADERBOARD 
-════════════════════════════════════════════ */function initGame() {
+════════════════════════════════════════════ */
+function initGame() {
   S.players = [{ id: S.myId, name: S.playerName, avatarDef: PREMIUM_AVATARS[S.avatarIdx], score: 0, isSelf: true, guessed: false }];
   S.drawerIdx = 0;
   setupToolbar(); setupChat(); setupContextMenu();
@@ -337,7 +338,7 @@ function startWordSelection() {
     $('ws-timer-bar').style.transition = 'width 1s linear'; $('ws-timer-bar').style.width = (t/15*100)+'%';
     if (t <= 0) { clearInterval(S.wsTimerInterval); chooseWord(choices[0].w); }
   }, 1000);
-
+} // <--- THIS WAS THE MISSING BRACKET!
 
 function chooseWord(word) {
   clearInterval(S.wsTimerInterval); overlayWordSelect.classList.add('hidden');
