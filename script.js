@@ -690,7 +690,25 @@ function setupToolbar() {
    CHAT, CONTEXT MENUS & UTILS
 ════════════════════════════════════════════ */
 function setupChat() {
-  btnChatSend.addEventListener('click', sendGuess);
+  // Add this right below setupChat()
+function getEditDistance(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+   btnChatSend.addEventListener('click', sendGuess);
   chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendGuess(); } });
 }
 
@@ -724,8 +742,15 @@ function sendGuess() {
 }
 
 function addChat(type, name, text) {
-  const div = document.createElement('div'); div.className = 'chat-msg ' + (type === 'correct' ? 'correct' : type === 'system' ? 'system' : 'normal');
-  div.innerHTML = type === 'system' ? `<span class="msg-text">${escHtml(text)}</span>` : `<span class="msg-name">${escHtml(name)}:</span> <span class="msg-text">${escHtml(text)}</span>`;
+  const div = document.createElement('div'); 
+  // Determine which CSS class to apply based on the type
+  div.className = 'chat-msg ' + (type === 'correct' ? 'correct' : type === 'system' ? 'system' : type === 'close' ? 'close' : 'normal');
+  
+  // Format the inner HTML (hide the player name for system and close messages)
+  div.innerHTML = (type === 'system' || type === 'close') 
+    ? `<span class="msg-text">${escHtml(text)}</span>` 
+    : `<span class="msg-name">${escHtml(name)}:</span> <span class="msg-text">${escHtml(text)}</span>`;
+    
   chatMessages.appendChild(div); chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
