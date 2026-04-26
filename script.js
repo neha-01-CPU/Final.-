@@ -1,7 +1,10 @@
 /* ================================================================
-   PICAZO — script.js  v6.0 (Online Multiplayer Ready)
+   PICAZO — script.js  v7.0 (LIVE WEBSOCKETS MULTIPLAYER)
 ================================================================ */
 'use strict';
+
+// 🌐 1. CONNECT TO YOUR LOCAL SERVER
+const socket = io("http://localhost:3000");
 
 /* ════════════════════════════════════════════
    CONSTANTS & DATA
@@ -61,7 +64,7 @@ const PREMIUM_AVATARS = [
 
 let S = {
   avatarIdx: 0, playerName: '', 
-  totalRounds: 3, drawTime: 85, maxPlayers: 8, hintsCount: 2, customWords: [],
+  totalRounds: 3, drawTime: 85, maxPlayers: 12, hintsCount: 2, customWords: [],
   players: [], myId: 'me', drawerIdx: 0, round: 1, turnsThisRound: 0, currentWord: '', revealedIdx: [], guessedIds: new Set(), hintsFired: 0,
   timeLeft: 85, timerInterval: null, wsTimerInterval: null,
   isDrawing: false, tool: 'pencil', color: '#000000', brushSize: 3, strokes: [], isDrawer: false,
@@ -97,20 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('picazo-theme') === 'dark') applyTheme(true);
   themeCheckboxes.forEach(cb => { cb.addEventListener('change', (e) => applyTheme(e.target.checked)); });
 
-  const overlays = ['overlay-waiting', 'overlay-word-select', 'overlay-round-end'];
-  overlays.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      document.body.appendChild(el);
-      el.style.position = 'fixed';
-      el.style.zIndex = '9999';
-      el.style.borderRadius = '0';
-      el.style.height = '100dvh';
-      el.style.width = '100vw';
-      el.style.top = '0';
-      el.style.left = '0';
-    }
-  });
   setupMobileLayout();
 });
 
@@ -134,7 +123,6 @@ $('btn-play').addEventListener('click', () => {
   const name = $('inp-name').value.trim();
   if (!name) { $('inp-name').classList.add('shake'); setTimeout(() => $('inp-name').classList.remove('shake'), 500); return; }
   
-  // Apply Public Lobby Defaults
   S.playerName = name; 
   S.totalRounds = 3; 
   S.drawTime = 85; 
@@ -193,37 +181,28 @@ function setupMobileLayout() {
     }
     if (!bottomRow.contains(lb)) bottomRow.appendChild(lb);
     if (!bottomRow.contains(chat)) bottomRow.appendChild(chat);
-
-    if (canvasCol && gameBody.firstChild !== canvasCol) {
-      gameBody.insertBefore(canvasCol, gameBody.firstChild);
-    }
-    if (chatForm && chatForm.parentNode !== gameBody) {
-      gameBody.appendChild(chatForm);
-    }
+    if (canvasCol && gameBody.firstChild !== canvasCol) gameBody.insertBefore(canvasCol, gameBody.firstChild);
+    if (chatForm && chatForm.parentNode !== gameBody) gameBody.appendChild(chatForm);
   } else {
     if (lb && lb.parentNode !== gameBody) gameBody.appendChild(lb);
     if (canvasCol && canvasCol.parentNode !== gameBody) gameBody.appendChild(canvasCol);
     if (chat && chat.parentNode !== gameBody) gameBody.appendChild(chat);
-
-    gameBody.appendChild(lb);
-    gameBody.appendChild(canvasCol);
-    gameBody.appendChild(chat);
-
+    gameBody.appendChild(lb); gameBody.appendChild(canvasCol); gameBody.appendChild(chat);
     if (bottomRow) bottomRow.remove();
-
-    if (chatForm && chatForm.parentNode !== chat) {
-      chat.appendChild(chatForm);
-    }
+    if (chatForm && chatForm.parentNode !== chat) chat.appendChild(chatForm);
   }
   setTimeout(resizeCanvas, 50);
 }
 window.addEventListener('resize', () => { setupMobileLayout(); resizeCanvas(); });
 
 /* ════════════════════════════════════════════
-   GAME INIT & ONLINE READY HOOKS
+   GAME INIT & SOCKET.IO HOOKS
 ════════════════════════════════════════════ */
 function initGame() {
-  S.players = [{ id: S.myId, name: S.playerName, avatarDef: PREMIUM_AVATARS[S.avatarIdx], score: 0, isSelf: true, guessed: false }];
+  // 🌐 2. Tell the server we want to join!
+  socket.emit('joinGame', { name: S.playerName, avatarDef: PREMIUM_AVATARS[S.avatarIdx] });
+  S.myId = socket.id;
+
   S.drawerIdx = 0; S.round = 1; S.turnsThisRound = 0;
   
   setupToolbar(); setupChat(); setupContextMenu(); initCanvas();
@@ -232,28 +211,44 @@ function initGame() {
   tFg.style.strokeDashoffset = '0'; tFg.setAttribute('class', 't-fg');
   timerNum.className = 'timer-num';
 
-  // Enter waiting state for online multiplayer
   $('overlay-waiting').classList.remove('hidden');
   $('wait-title').textContent = 'Waiting for players...';
   $('wait-sub').textContent = 'Need at least 2 players to start.';
   $('invite-box-wait').classList.remove('hidden');
   
-  addChat('system', '', `📡 Connected to lobby. (1/${S.maxPlayers})`);
   roundBadge.textContent = `Round 1/${S.totalRounds}`;
-  buildLeaderboard();
-  
-  // NOTE: The game will naturally hang here until the backend calls window.addNetworkPlayer()
 }
 
-// 🌐 BACKEND HOOK: Call this from your WebSocket when someone joins!
-window.addNetworkPlayer = function(id, name, avatarDef) {
-  if (S.players.length >= S.maxPlayers) return;
-  
-  S.players.push({ id, name, avatarDef, score: 0, isSelf: false, guessed: false });
+// 🌐 3. SERVER SENDS CURRENT PLAYERS
+socket.on('currentPlayers', (serverPlayers) => {
+  S.players = serverPlayers.map(p => ({...p, score: 0, isSelf: p.id === socket.id, guessed: false}));
   buildLeaderboard();
-  addChat('system', '', `👋 ${name} joined! (${S.players.length}/${S.maxPlayers})`);
-  showToast(`👋 ${name} joined!`, 't-info');
+  checkLobbyReady();
+});
 
+// 🌐 4. SERVER SAYS SOMEONE JOINED
+socket.on('playerJoined', (newPlayer) => {
+  if (newPlayer.id === socket.id) return; 
+  S.players.push({...newPlayer, score: 0, isSelf: false, guessed: false});
+  buildLeaderboard();
+  addChat('system', '', `👋 ${newPlayer.name} joined! (${S.players.length}/${S.maxPlayers})`);
+  showToast(`👋 ${newPlayer.name} joined!`, 't-info');
+  checkLobbyReady();
+});
+
+// 🌐 5. SERVER SAYS SOMEONE LEFT
+socket.on('playerLeft', (id) => {
+  const idx = S.players.findIndex(p => p.id === id);
+  if (idx !== -1) {
+    const name = S.players[idx].name;
+    S.players.splice(idx, 1);
+    buildLeaderboard();
+    addChat('system', '', `🚪 ${name} left.`);
+    checkLobbyReady();
+  }
+});
+
+function checkLobbyReady() {
   const isWaiting = !$('overlay-waiting').classList.contains('hidden');
   if (S.players.length >= 2 && isWaiting) {
      $('wait-title').textContent = 'Players found!';
@@ -263,27 +258,14 @@ window.addNetworkPlayer = function(id, name, avatarDef) {
        showEventPopup('🎮', 'Game started!');
        startWordSelection();
      }, 2500);
-  }
-};
-
-// 🌐 BACKEND HOOK: Call this from your WebSocket when someone leaves!
-window.removeNetworkPlayer = function(id) {
-  const idx = S.players.findIndex(p => p.id === id);
-  if (idx === -1) return;
-  const name = S.players[idx].name;
-  S.players.splice(idx, 1);
-  buildLeaderboard();
-  addChat('system', '', `🚪 ${name} left.`);
-
-  // Fallback to waiting room if too few players remain
-  if (S.players.length < 2 && $('overlay-waiting').classList.contains('hidden')) {
+  } else if (S.players.length < 2 && !isWaiting) {
      clearInterval(S.timerInterval);
      clearInterval(S.wsTimerInterval);
      $('overlay-waiting').classList.remove('hidden');
      $('wait-title').textContent = 'Not enough players';
      $('wait-sub').textContent = 'Waiting for more players to join...';
   }
-};
+}
 
 function buildLeaderboard() {
   const sorted = [...S.players].sort((a, b) => b.score - a.score);
@@ -324,7 +306,6 @@ function startRoundTimer() {
   S.timerInterval = setInterval(() => {
     S.timeLeft--;
     
-    // Slow Hints: Trigger dynamically at exactly 50% and 25% of the total time
     if (S.timeLeft === Math.floor(S.drawTime * 0.5) || S.timeLeft === Math.floor(S.drawTime * 0.25)) {
       revealHintLetter();
     }
@@ -371,7 +352,7 @@ function startWordSelection() {
     $('toolbar').style.opacity = '0.4';
     wsCards.style.display = 'none';
     headerH2.textContent = 'Waiting...';
-    headerP.innerHTML = `${S.players[S.drawerIdx].name} is picking a word... <span id="ws-timer" class="ws-clock">15</span>s`;
+    headerP.innerHTML = `${S.players[S.drawerIdx] ? S.players[S.drawerIdx].name : 'Artist'} is picking a word... <span id="ws-timer" class="ws-clock">15</span>s`;
   }
 
   let t = 15; 
@@ -390,7 +371,7 @@ function startWordSelection() {
 function chooseWord(word) {
   clearInterval(S.wsTimerInterval); overlayWordSelect.classList.add('hidden');
   S.currentWord = word; S.revealedIdx = []; renderWordBlanks(); startRoundTimer();
-  addChat('system', '', `${S.players[S.drawerIdx].name} is drawing! 🖊️`);
+  addChat('system', '', `${S.players[S.drawerIdx] ? S.players[S.drawerIdx].name : 'The artist'} is drawing! 🖊️`);
   ctx.fillStyle = 'white'; ctx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
   S.history = []; 
 }
@@ -447,7 +428,6 @@ function endRound(allGuessed = false) {
   
   overlayRoundEnd.classList.remove('hidden');
 
-  // Check if every player has drawn, and if this was the final round
   const isLastTurn = (S.round >= S.totalRounds) && (S.turnsThisRound >= S.players.length - 1);
   
   $('re-next').style.display = '';
@@ -476,7 +456,6 @@ function endRound(allGuessed = false) {
 function nextRound() {
   S.turnsThisRound++;
   
-  // If everyone has drawn, increment the actual Round number
   if (S.turnsThisRound >= S.players.length) {
     S.round++;
     S.turnsThisRound = 0;
@@ -487,7 +466,7 @@ function nextRound() {
   roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`; 
   S.currentWord = ''; buildLeaderboard();
   
-  addChat('system', '', `🔄 Turn ${S.turnsThisRound + 1} — ${S.players[S.drawerIdx].name} draws!`); 
+  addChat('system', '', `🔄 Turn ${S.turnsThisRound + 1} — ${S.players[S.drawerIdx] ? S.players[S.drawerIdx].name : 'Artist'} draws!`); 
   startWordSelection();
 }
 
@@ -497,7 +476,7 @@ function resetGame() {
   if (btnWrap) btnWrap.remove(); 
 
   S.players.forEach(p => { p.score = 0; p.guessed = false; });
-  S.round = 1; S.turnsThisRound = 0; S.drawerIdx = 0; S.isDrawer = S.players[S.drawerIdx].id === S.myId;
+  S.round = 1; S.turnsThisRound = 0; S.drawerIdx = 0; S.isDrawer = S.players[S.drawerIdx] ? S.players[S.drawerIdx].id === S.myId : false;
   S.currentWord = ''; S.guessedIds.clear(); S.hintsFired = 0; S.history = [];
 
   roundBadge.textContent = `Round ${S.round}/${S.totalRounds}`;
@@ -506,19 +485,11 @@ function resetGame() {
   addChat('system', '', '🔄 New Game Started! Scores reset.');
   
   buildLeaderboard();
-  
-  // Only start automatically if players are still in the room
-  if (S.players.length >= 2) {
-    startWordSelection();
-  } else {
-    $('overlay-waiting').classList.remove('hidden');
-    $('wait-title').textContent = 'Waiting for players...';
-    $('wait-sub').textContent = 'Need at least 2 players to start.';
-  }
+  checkLobbyReady();
 }
 
 /* ════════════════════════════════════════════
-   CANVAS DRAWING (UNIFIED TOUCH & MOUSE) & UNDO
+   CANVAS DRAWING (SYNCED TO SERVER)
 ════════════════════════════════════════════ */
 function initCanvas() {
   resizeCanvas();
@@ -530,6 +501,25 @@ function initCanvas() {
   window.addEventListener('mousemove', onDrawMove);
   window.addEventListener('mouseup', onDrawEnd);
 }
+
+// 🌐 6. LISTEN FOR OTHER PLAYERS DRAWING
+socket.on('drawData', (data) => {
+  if (data.type === 'start') {
+    ctx.beginPath();
+    ctx.moveTo(data.x, data.y);
+    ctx.lineTo(data.x, data.y);
+    ctx.strokeStyle = data.color;
+    ctx.lineWidth = data.size;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  } else if (data.type === 'move') {
+    ctx.lineTo(data.x, data.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(data.x, data.y);
+  }
+});
 
 function resizeCanvas() {
   const rect = canvasWrap.getBoundingClientRect();
@@ -544,16 +534,11 @@ function resizeCanvas() {
 
   gameCanvas.width = W * S.dpr; 
   gameCanvas.height = H * S.dpr;
-  
   ctx.scale(S.dpr, S.dpr); 
-  ctx.lineCap = 'round'; 
-  ctx.lineJoin = 'round'; 
-  ctx.fillStyle = 'white'; 
-  ctx.fillRect(0, 0, W, H);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round'; 
+  ctx.fillStyle = 'white'; ctx.fillRect(0, 0, W, H);
 
-  if (oldData) {
-    ctx.putImageData(oldData, 0, 0);
-  }
+  if (oldData) ctx.putImageData(oldData, 0, 0);
 }
 
 function saveState() {
@@ -564,19 +549,10 @@ function saveState() {
 function getXY(e) {
   const r = gameCanvas.getBoundingClientRect();
   let cx = e.clientX, cy = e.clientY;
-  if (e.touches && e.touches.length > 0) {
-    cx = e.touches[0].clientX; cy = e.touches[0].clientY;
-  } else if (e.changedTouches && e.changedTouches.length > 0) {
-    cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY;
-  }
-  
-  const scaleX = (gameCanvas.width / S.dpr) / r.width;
-  const scaleY = (gameCanvas.height / S.dpr) / r.height;
-  
-  return { 
-    x: (cx - r.left) * scaleX, 
-    y: (cy - r.top) * scaleY 
-  };
+  if (e.touches && e.touches.length > 0) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; } 
+  else if (e.changedTouches && e.changedTouches.length > 0) { cx = e.changedTouches[0].clientX; cy = e.changedTouches[0].clientY; }
+  const scaleX = (gameCanvas.width / S.dpr) / r.width, scaleY = (gameCanvas.height / S.dpr) / r.height;
+  return { x: (cx - r.left) * scaleX, y: (cy - r.top) * scaleY };
 }
 
 function onDrawStart(e) {
@@ -585,7 +561,6 @@ function onDrawStart(e) {
   
   S.isDrawing = true;
   const pos = getXY(e);
-
   saveState();
 
   if (S.tool === 'fill') {
@@ -594,14 +569,20 @@ function onDrawStart(e) {
     return;
   }
 
+  const drawColor = S.tool === 'eraser' ? '#ffffff' : S.color;
+  const drawSize = S.tool === 'eraser' ? S.brushSize * 3 : S.brushSize;
+
   ctx.beginPath();
   ctx.moveTo(pos.x, pos.y);
   ctx.lineTo(pos.x, pos.y);
-  ctx.strokeStyle = S.tool === 'eraser' ? '#ffffff' : S.color;
-  ctx.lineWidth = S.tool === 'eraser' ? S.brushSize * 3 : S.brushSize;
+  ctx.strokeStyle = drawColor;
+  ctx.lineWidth = drawSize;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.stroke();
+
+  // 🌐 7. BROADCAST DRAW START TO SERVER
+  socket.emit('drawing', { x: pos.x, y: pos.y, color: drawColor, size: drawSize, type: 'start' });
 }
 
 function onDrawMove(e) {
@@ -613,6 +594,11 @@ function onDrawMove(e) {
   
   ctx.beginPath();
   ctx.moveTo(pos.x, pos.y);
+
+  // 🌐 8. BROADCAST DRAW MOVE TO SERVER
+  const drawColor = S.tool === 'eraser' ? '#ffffff' : S.color;
+  const drawSize = S.tool === 'eraser' ? S.brushSize * 3 : S.brushSize;
+  socket.emit('drawing', { x: pos.x, y: pos.y, color: drawColor, size: drawSize, type: 'move' });
 }
 
 function onDrawEnd(e) {
@@ -694,7 +680,6 @@ function setupChat() {
   chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendGuess(); } });
 }
 
-// 🧮 LEVENSHTEIN DISTANCE (Must be outside setupChat so sendGuess can use it!)
 function getEditDistance(a, b) {
   if (a.length === 0) return b.length;
   if (b.length === 0) return a.length;
@@ -722,7 +707,6 @@ function sendGuess() {
   
   if (word && guess === word) {
     const pts = Math.floor((S.timeLeft / S.drawTime) * 400) + 100;
-    
     const me = S.players.find(p => p.isSelf);
     if (me) { me.score += pts; me.guessed = true; }
     S.guessedIds.add(S.myId);
@@ -737,10 +721,9 @@ function sendGuess() {
     buildLeaderboard();
     
     const nonDrawers = S.players.filter(p => p.id !== S.players[S.drawerIdx]?.id);
-    if (nonDrawers.every(p => p.guessed)) { clearInterval(S.timerInterval); setTimeout(() => endRound(true), 800); }
+    if (nonDrawers.length > 0 && nonDrawers.every(p => p.guessed)) { clearInterval(S.timerInterval); setTimeout(() => endRound(true), 800); }
     
   } else if (word && guess.length > 2) {
-    // 🔍 CLOSE GUESS DETECTION
     const threshold = word.length <= 5 ? 1 : 2;
     if (getEditDistance(guess, word) <= threshold) {
       addChat('normal', S.playerName, val);
@@ -756,15 +739,14 @@ function sendGuess() {
 function addChat(type, name, text) {
   const div = document.createElement('div'); 
   div.className = 'chat-msg ' + (type === 'correct' ? 'correct' : type === 'system' ? 'system' : type === 'close' ? 'close' : 'normal');
-  
   div.innerHTML = (type === 'system' || type === 'close') 
     ? `<span class="msg-text">${escHtml(text)}</span>` 
     : `<span class="msg-name">${escHtml(name)}:</span> <span class="msg-text">${escHtml(text)}</span>`;
-    
   chatMessages.appendChild(div); chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-$('btn-mute').addEventListener('click', () => {  S.isMuted = !S.isMuted;
+$('btn-mute').addEventListener('click', () => {
+  S.isMuted = !S.isMuted;
   $('mute-icon').innerHTML = S.isMuted ? `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>` : `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>`;
 });
 
@@ -779,13 +761,10 @@ function setupContextMenu() {
 function openContextMenu(e, player) {
   e.stopPropagation(); S.ctxTarget = player;
   ctxName.textContent = player.name; ctxPts.textContent = player.score + ' pts';
-  
   ctxAv.innerHTML = ''; 
   const img = document.createElement('img'); 
-  img.src = player.avatarDef; 
-  img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover'; 
+  img.src = player.avatarDef; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover'; 
   ctxAv.appendChild(img);
-  
   contextMenu.classList.remove('hidden');
   contextMenu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
   contextMenu.style.top = Math.min(e.clientY, window.innerHeight - 240) + 'px';
@@ -826,7 +805,7 @@ function endGame() {
   $('re-title').textContent = 'Game Over!'; 
   
   const reWordP = document.getElementById('re-word');
-  if(reWordP) reWordP.innerHTML = `Winner: <strong>${escHtml(winner.name)}</strong>`;
+  if(reWordP) reWordP.innerHTML = `Winner: <strong>${escHtml(winner ? winner.name : 'Unknown')}</strong>`;
   
   $('re-next').style.display = 'none';
 
@@ -891,7 +870,7 @@ function endGame() {
   btnWrap.appendChild(homeBtn);
   
   overlayRoundEnd.appendChild(btnWrap);
-  showEventPopup('🏆', `${winner.name} wins the game!`);
+  if (winner) showEventPopup('🏆', `${winner.name} wins the game!`);
 
   fireGrandConfetti();
 }
@@ -903,34 +882,13 @@ function fireGrandConfetti() {
   const end = Date.now() + duration;
 
   confetti({
-    particleCount: 250,
-    spread: 360,
-    origin: { y: 0.4, x: 0.5 },
-    startVelocity: 65,
-    colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
-    zIndex: 99999
+    particleCount: 250, spread: 360, origin: { y: 0.4, x: 0.5 }, startVelocity: 65,
+    colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'], zIndex: 99999
   });
 
   (function frame() {
-    confetti({
-      particleCount: 10,
-      angle: 60,
-      spread: 100,
-      origin: { x: -0.1, y: 0.8 },
-      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899'],
-      zIndex: 99999
-    });
-    confetti({
-      particleCount: 10,
-      angle: 120,
-      spread: 100,
-      origin: { x: 1.1, y: 0.8 },
-      colors: ['#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
-      zIndex: 99999
-    });
-
-    if (Date.now() < end) {
-      requestAnimationFrame(frame);
-    }
+    confetti({ particleCount: 10, angle: 60, spread: 100, origin: { x: -0.1, y: 0.8 }, colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899'], zIndex: 99999 });
+    confetti({ particleCount: 10, angle: 120, spread: 100, origin: { x: 1.1, y: 0.8 }, colors: ['#f4b942', '#ec4899', '#8b5cf6', '#ffffff'], zIndex: 99999 });
+    if (Date.now() < end) requestAnimationFrame(frame);
   }());
 }
