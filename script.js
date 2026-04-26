@@ -507,7 +507,7 @@ function nextRound() {
 }
 
 /* ════════════════════════════════════════════
-   END GAME & GRAND CONFETTI (Horizontal Podium)
+   END GAME & FULL SCREEN EXPLOSION
 ════════════════════════════════════════════ */
 function endGame() {
   clearInterval(S.timerInterval); BotManager.stop();
@@ -541,7 +541,7 @@ function endGame() {
           <div class="podium-crown">${crown}</div>
           <div class="podium-av-wrap"><img src="${p.avatarDef}" alt="Avatar"></div>
           <div class="podium-name">${escHtml(p.name)}</div>
-          <div class="podium-pts">${p.score}</div>
+          <div class="podium-pts">${p.score} pts</div>
         </div>
       `;
     }
@@ -564,61 +564,81 @@ function endGame() {
   });
   restHTML += '</div>';
 
-  // Output all players to the score container
   $('re-scores').innerHTML = podiumHTML + restHTML;
 
-  // 4. Safely Inject Play Again & Home Buttons
+  // 4. Inject Premium Glassmorphism Buttons
   let oldBtnWrap = document.getElementById('podium-btns');
   if (oldBtnWrap) oldBtnWrap.remove(); 
 
-  const buttonsHTML = `
-    <div id="podium-btns" class="podium-btn-wrap">
-      <button class="glass-fluid-btn play-btn" onclick="resetGame()"><span>🔄 Play Again</span></button>
-      <button class="glass-fluid-btn home-btn" onclick="location.reload()"><span>🏠 Home</span></button>
-    </div>
-  `;
+  const btnWrap = document.createElement('div');
+  btnWrap.id = 'podium-btns';
+  btnWrap.className = 'podium-btn-wrap';
+
+  const playBtn = document.createElement('button');
+  playBtn.innerHTML = '<span>🔄 Play Again</span>';
+  playBtn.className = 'glass-fluid-btn play-btn';
+  playBtn.onclick = () => resetGame();
+
+  const homeBtn = document.createElement('button');
+  homeBtn.innerHTML = '<span>🏠 Home</span>';
+  homeBtn.className = 'glass-fluid-btn home-btn';
+  homeBtn.onclick = () => location.reload(); 
+
+  btnWrap.appendChild(playBtn);
+  btnWrap.appendChild(homeBtn);
   
-  $('re-scores').insertAdjacentHTML('afterend', buttonsHTML);
-  injectGlassyStyles();
+  document.querySelector('.re-inner').appendChild(btnWrap);
   showEventPopup('🏆', `${winner.name} wins the game!`);
 
-  // 5. Fire Massive Confetti Explosion
+  // 5. Fire Massive Full-Screen Confetti Explosion
   fireGrandConfetti();
 }
 
 function fireGrandConfetti() {
-  if (typeof confetti === 'undefined') {
-    console.error("Confetti script not loaded!");
-    return;
-  }
+  if (typeof confetti === 'undefined') return;
 
-  const duration = 4500; // 4.5 seconds of non-stop explosion
+  const duration = 4000; // 4 seconds of explosion
   const end = Date.now() + duration;
 
+  // MASSIVE INITIAL CENTER BURST (The full screen explosion!)
+  confetti({
+    particleCount: 200,
+    spread: 360,
+    origin: { y: 0.4, x: 0.5 },
+    startVelocity: 55,
+    colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
+    zIndex: 99999
+  });
+
+  // Continuous overlapping cannons to keep the screen filled
   (function frame() {
-    // Fire from left edge
     confetti({
-      particleCount: 10,
+      particleCount: 8,
       angle: 60,
-      spread: 80,
-      origin: { x: 0, y: 0.8 },
-      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
+      spread: 100,
+      origin: { x: -0.1, y: 0.8 },
+      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899'],
       zIndex: 99999
     });
-    // Fire from right edge
     confetti({
-      particleCount: 10,
+      particleCount: 8,
       angle: 120,
-      spread: 80,
-      origin: { x: 1, y: 0.8 },
-      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
+      spread: 100,
+      origin: { x: 1.1, y: 0.8 },
+      colors: ['#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
       zIndex: 99999
     });
+    
+    // Occasional sky drops
+    if (Math.random() > 0.8) {
+      confetti({ particleCount: 20, angle: 270, spread: 80, origin: { x: Math.random(), y: -0.2 }, zIndex: 99999 });
+    }
 
     if (Date.now() < end) {
       requestAnimationFrame(frame);
     }
   }());
+}
 }/* ════════════════════════════════════════════
    CANVAS DRAWING (UNIFIED TOUCH & MOUSE) & UNDO
 ════════════════════════════════════════════ */
