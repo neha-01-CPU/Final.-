@@ -506,139 +506,7 @@ function nextRound() {
   addChat('system', '', `🔄 Round ${S.round} — ${S.players[S.drawerIdx].name} draws!`); startWordSelection();
 }
 
-/* ════════════════════════════════════════════
-   END GAME & FULL SCREEN EXPLOSION
-════════════════════════════════════════════ */
-function endGame() {
-  clearInterval(S.timerInterval); BotManager.stop();
-  const sortedPlayers = [...S.players].sort((a, b) => b.score - a.score);
-  const winner = sortedPlayers[0];
-  
-  overlayRoundEnd.classList.remove('hidden'); 
-  $('re-emoji').textContent = '🏆'; 
-  $('re-title').textContent = 'Game Over!'; 
-  
-  const reWordP = document.getElementById('re-word');
-  if(reWordP) reWordP.innerHTML = `Winner: <strong>${escHtml(winner.name)}</strong>`;
-  
-  $('re-next').style.display = 'none';
 
-  // 1. Separate Top 3 and the Rest
-  const top3 = sortedPlayers.slice(0, 3);
-  const rest = sortedPlayers.slice(3);
-
-  // 2. Build Horizontal Podium (Order: 2nd, 1st, 3rd)
-  let podiumHTML = '<div class="podium-top3">';
-  const order = [1, 0, 2]; // 1st place in the middle
-  
-  order.forEach(idx => {
-    const p = top3[idx];
-    if (p) {
-      const rank = idx + 1;
-      const crown = rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉';
-      podiumHTML += `
-        <div class="podium-place rank-${rank}" style="animation-delay: ${idx * 0.15}s">
-          <div class="podium-crown">${crown}</div>
-          <div class="podium-av-wrap"><img src="${p.avatarDef}" alt="Avatar"></div>
-          <div class="podium-name">${escHtml(p.name)}</div>
-          <div class="podium-pts">${p.score} pts</div>
-        </div>
-      `;
-    }
-  });
-  podiumHTML += '</div>';
-
-  // 3. Build Vertical List for the rest
-  let restHTML = '<div class="re-scores-list">';
-  rest.forEach((p, i) => {
-    restHTML += `
-      <div class="re-score-row" style="animation-delay:${0.5 + (i * 0.08)}s">
-        <div class="re-score-left">
-          <span class="re-score-rank">#${i + 4}</span>
-          <div class="re-score-av-wrap-small"><img class="re-score-av" src="${p.avatarDef}" alt="Avatar"></div>
-          <span class="re-score-name">${escHtml(p.name)}</span>
-        </div>
-        <span class="re-score-pts">${p.score} pts</span>
-      </div>
-    `;
-  });
-  restHTML += '</div>';
-
-  $('re-scores').innerHTML = podiumHTML + restHTML;
-
-  // 4. Inject Premium Glassmorphism Buttons
-  let oldBtnWrap = document.getElementById('podium-btns');
-  if (oldBtnWrap) oldBtnWrap.remove(); 
-
-  const btnWrap = document.createElement('div');
-  btnWrap.id = 'podium-btns';
-  btnWrap.className = 'podium-btn-wrap';
-
-  const playBtn = document.createElement('button');
-  playBtn.innerHTML = '<span>🔄 Play Again</span>';
-  playBtn.className = 'glass-fluid-btn play-btn';
-  playBtn.onclick = () => resetGame();
-
-  const homeBtn = document.createElement('button');
-  homeBtn.innerHTML = '<span>🏠 Home</span>';
-  homeBtn.className = 'glass-fluid-btn home-btn';
-  homeBtn.onclick = () => location.reload(); 
-
-  btnWrap.appendChild(playBtn);
-  btnWrap.appendChild(homeBtn);
-  
-  document.querySelector('.re-inner').appendChild(btnWrap);
-  showEventPopup('🏆', `${winner.name} wins the game!`);
-
-  // 5. Fire Massive Full-Screen Confetti Explosion
-  fireGrandConfetti();
-}
-
-function fireGrandConfetti() {
-  if (typeof confetti === 'undefined') return;
-
-  const duration = 4000; // 4 seconds of explosion
-  const end = Date.now() + duration;
-
-  // MASSIVE INITIAL CENTER BURST (The full screen explosion!)
-  confetti({
-    particleCount: 200,
-    spread: 360,
-    origin: { y: 0.4, x: 0.5 },
-    startVelocity: 55,
-    colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
-    zIndex: 99999
-  });
-
-  // Continuous overlapping cannons to keep the screen filled
-  (function frame() {
-    confetti({
-      particleCount: 8,
-      angle: 60,
-      spread: 100,
-      origin: { x: -0.1, y: 0.8 },
-      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899'],
-      zIndex: 99999
-    });
-    confetti({
-      particleCount: 8,
-      angle: 120,
-      spread: 100,
-      origin: { x: 1.1, y: 0.8 },
-      colors: ['#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
-      zIndex: 99999
-    });
-    
-    // Occasional sky drops
-    if (Math.random() > 0.8) {
-      confetti({ particleCount: 20, angle: 270, spread: 80, origin: { x: Math.random(), y: -0.2 }, zIndex: 99999 });
-    }
-
-    if (Date.now() < end) {
-      requestAnimationFrame(frame);
-    }
-  }());
-}
 }/* ════════════════════════════════════════════
    CANVAS DRAWING (UNIFIED TOUCH & MOUSE) & UNDO
 ════════════════════════════════════════════ */
@@ -902,3 +770,135 @@ function floatPoints(text, x, y) {
 
 function shuffled(arr) { return [...arr].sort(() => Math.random() - 0.5); }
 function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* ════════════════════════════════════════════
+   END GAME & FULL SCREEN EXPLOSION
+════════════════════════════════════════════ */
+function endGame() {
+  clearInterval(S.timerInterval); BotManager.stop();
+  const sortedPlayers = [...S.players].sort((a, b) => b.score - a.score);
+  const winner = sortedPlayers[0];
+  
+  overlayRoundEnd.classList.remove('hidden'); 
+  // Ensure the overlay stacks elements vertically
+  overlayRoundEnd.style.flexDirection = 'column'; 
+  
+  $('re-emoji').textContent = '🏆'; 
+  $('re-title').textContent = 'Game Over!'; 
+  
+  const reWordP = document.getElementById('re-word');
+  if(reWordP) reWordP.innerHTML = `Winner: <strong>${escHtml(winner.name)}</strong>`;
+  
+  $('re-next').style.display = 'none';
+
+  // 1. Separate Top 3 and the Rest
+  const top3 = sortedPlayers.slice(0, 3);
+  const rest = sortedPlayers.slice(3);
+
+  // 2. Build Horizontal Podium (Order: 2nd, 1st, 3rd)
+  let podiumHTML = '<div class="podium-top3">';
+  const order = [1, 0, 2]; // 1st place in the middle
+  
+  order.forEach(idx => {
+    const p = top3[idx];
+    if (p) {
+      const rank = idx + 1;
+      const crown = rank === 1 ? '👑' : rank === 2 ? '🥈' : '🥉';
+      podiumHTML += `
+        <div class="podium-place rank-${rank}" style="animation-delay: ${idx * 0.15}s">
+          <div class="podium-crown">${crown}</div>
+          <div class="podium-av-wrap"><img src="${p.avatarDef}" alt="Avatar"></div>
+          <div class="podium-name">${escHtml(p.name)}</div>
+          <div class="podium-pts">${p.score} pts</div>
+        </div>
+      `;
+    }
+  });
+  podiumHTML += '</div>';
+
+  // 3. Build Vertical List for the rest
+  let restHTML = '<div class="re-scores-list">';
+  rest.forEach((p, i) => {
+    restHTML += `
+      <div class="re-score-row" style="animation-delay:${0.5 + (i * 0.08)}s">
+        <div class="re-score-left">
+          <span class="re-score-rank">#${i + 4}</span>
+          <div class="re-score-av-wrap-small"><img class="re-score-av" src="${p.avatarDef}" alt="Avatar"></div>
+          <span class="re-score-name">${escHtml(p.name)}</span>
+        </div>
+        <span class="re-score-pts">${p.score} pts</span>
+      </div>
+    `;
+  });
+  restHTML += '</div>';
+
+  $('re-scores').innerHTML = podiumHTML + restHTML;
+
+  // 4. Inject Premium Glowing Buttons OUTSIDE the card
+  let oldBtnWrap = document.getElementById('podium-btns');
+  if (oldBtnWrap) oldBtnWrap.remove(); 
+
+  const btnWrap = document.createElement('div');
+  btnWrap.id = 'podium-btns';
+  btnWrap.className = 'podium-btn-wrap';
+
+  const playBtn = document.createElement('button');
+  playBtn.innerHTML = '<span>🔄 Play Again</span>';
+  playBtn.className = 'glass-fluid-btn play-btn';
+  playBtn.onclick = () => resetGame();
+
+  const homeBtn = document.createElement('button');
+  homeBtn.innerHTML = '<span>🏠 Home</span>';
+  homeBtn.className = 'glass-fluid-btn home-btn';
+  homeBtn.onclick = () => location.reload(); 
+
+  btnWrap.appendChild(playBtn);
+  btnWrap.appendChild(homeBtn);
+  
+  // Attach to the overlay so they float outside the white card!
+  overlayRoundEnd.appendChild(btnWrap);
+  showEventPopup('🏆', `${winner.name} wins the game!`);
+
+  // 5. Fire Massive Full-Screen Confetti Explosion
+  fireGrandConfetti();
+}
+
+function fireGrandConfetti() {
+  if (typeof confetti === 'undefined') return;
+
+  const duration = 4000; 
+  const end = Date.now() + duration;
+
+  // MASSIVE INITIAL CENTER BURST (The full screen explosion!)
+  confetti({
+    particleCount: 250,
+    spread: 360,
+    origin: { y: 0.4, x: 0.5 },
+    startVelocity: 65,
+    colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
+    zIndex: 99999
+  });
+
+  // Continuous overlapping cannons
+  (function frame() {
+    confetti({
+      particleCount: 10,
+      angle: 60,
+      spread: 100,
+      origin: { x: -0.1, y: 0.8 },
+      colors: ['#4a8fe8', '#2ecc87', '#f4b942', '#ec4899'],
+      zIndex: 99999
+    });
+    confetti({
+      particleCount: 10,
+      angle: 120,
+      spread: 100,
+      origin: { x: 1.1, y: 0.8 },
+      colors: ['#f4b942', '#ec4899', '#8b5cf6', '#ffffff'],
+      zIndex: 99999
+    });
+
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  }());
+}
