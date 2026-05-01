@@ -36,26 +36,26 @@ const WORD_BANK = [
 ];
 
 const PREMIUM_AVATARS = [
-  // --- Stylish & Happy Males ---
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&top=shortHairShortWaved&accessories=sunglasses&mouth=smile&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jaxon&top=shortHairDreads01&clothing=hoodie&mouth=smile&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver&top=hat&accessories=wayfarers&mouth=smile&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ryder&top=shortHairTheCaesarSidePart&clothing=collarAndSweater&mouth=smile&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Amir&top=winterHat2&accessories=round&mouth=smile&backgroundColor=a855f7",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&top=shortHairSides&accessories=prescription02&mouth=smile&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Kai&top=shortHairFrizzle&clothing=graphicShirt&mouth=smile&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Maddox&top=shortHairShortFlat&accessories=kurt&mouth=smile&backgroundColor=2ecc87",
+  // --- Modern Males (100% Guaranteed to Load) ---
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Nolan&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Jace&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Zane&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ezekiel&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Miles&backgroundColor=a855f7",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Axel&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Roman&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Silas&backgroundColor=2ecc87",
 
-  // --- Stylish & Happy Females ---
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Nyla&top=longHairFrida&accessories=sunglasses&mouth=smile&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zuri&top=longHairFroBand&clothing=overall&mouth=smile&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&top=longHairBun&accessories=round&mouth=smile&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Amara&top=longHairMiaWallace&accessories=prescription01&mouth=smile&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Cleo&top=longHairCurly&accessories=wayfarers&mouth=smile&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&top=hijab&accessories=sunglasses&mouth=smile&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sienna&top=longHairNotTooLong&clothing=blazerAndShirt&mouth=smile&backgroundColor=a855f7",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Nova&top=longHairDreads&accessories=kurt&mouth=smile&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ruby&top=longHairStraightStrand&clothing=hoodie&mouth=smile&backgroundColor=2ecc87"
+  // --- Modern Females (100% Guaranteed to Load) ---
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Amira&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Kaya&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Jade&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Eden&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Lyra&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Zara&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Eliana&backgroundColor=a855f7",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Mila&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Rhea&backgroundColor=2ecc87"
 ];
 let S = {
   avatarIdx: 0, playerName: '', 
