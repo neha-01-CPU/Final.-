@@ -36,28 +36,27 @@ const WORD_BANK = [
 ];
 
 const PREMIUM_AVATARS = [
-  // --- Modern Vector Males ---
-  "https://api.dicebear.com/7.x/micah/svg?seed=Felix&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Jasper&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Milo&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Oliver&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Chase&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Max&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sam&backgroundColor=f0525e",
-  
-  // --- Modern Vector Females ---
-  "https://api.dicebear.com/7.x/micah/svg?seed=Aneka&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Luna&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Chloe&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Zoe&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ruby&backgroundColor=2ecc87"
-];
+  // --- Stylish Males (Caps, Shades, Hoodies, Dreads) ---
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Chase&top=hat&accessories=sunglasses&clothing=hoodie&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&top=shortHairDreads01&facialHair=beardMedium&clothing=blazerAndShirt&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Max&top=winterHat2&accessories=round&clothing=sweater&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&top=shortHairShortFlat&accessories=kurt&clothing=graphicShirt&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sam&top=hat&accessories=wayfarers&clothing=shirtCrewNeck&backgroundColor=a855f7",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex&top=shortHairFrizzle&facialHair=moustacheMagnum&clothing=overall&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ryan&top=shortHairTheCaesarSidePart&accessories=sunglasses&clothing=hoodie&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zane&top=shortHairSides&accessories=prescription02&clothing=collarAndSweater&backgroundColor=2ecc87",
 
+  // --- Stylish Females (Hair bands, Shades, Buns, Cool Fits) ---
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&top=longHairFrida&accessories=kurt&clothing=blazerShirt&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&top=longHairCurly&accessories=sunglasses&clothing=overall&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily&top=longHairMiaWallace&accessories=round&clothing=shirtScoopNeck&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ruby&top=hijab&accessories=sunglasses&clothing=hoodie&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zoe&top=longHairFroBand&accessories=prescription02&clothing=shirtVNeck&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Chloe&top=longHairStraightStrand&accessories=wayfarers&clothing=blazerAndSweater&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ava&top=longHairDreads&clothing=hoodie&backgroundColor=a855f7",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ella&top=longHairBun&accessories=kurt&clothing=graphicShirt&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Maya&top=longHairNotTooLong&accessories=round&clothing=sweater&backgroundColor=2ecc87"
+];
 let S = {
   avatarIdx: 0, playerName: '', 
   totalRounds: 3, drawTime: 85, maxPlayers: 12, hintsCount: 2, customWords: [],
