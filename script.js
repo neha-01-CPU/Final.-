@@ -36,21 +36,26 @@ const WORD_BANK = [
 ];
 
 const PREMIUM_AVATARS = [
-  "https://api.dicebear.com/7.x/personas/svg?seed=Felix&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/personas/svg?seed=Aneka&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/personas/svg?seed=Jasper&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/personas/svg?seed=Luna&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/personas/svg?seed=Milo&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/personas/svg?seed=Aria&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Chase&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zoe&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Max&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Jack&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Ruby&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Sam&backgroundColor=4a8fe8"
+  // --- Modern Vector Males ---
+  "https://api.dicebear.com/7.x/micah/svg?seed=Felix&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Jasper&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Milo&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Oliver&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Chase&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Max&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sam&backgroundColor=f0525e",
+  
+  // --- Modern Vector Females ---
+  "https://api.dicebear.com/7.x/micah/svg?seed=Aneka&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Luna&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Chloe&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Zoe&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ruby&backgroundColor=2ecc87"
 ];
 
 let S = {
