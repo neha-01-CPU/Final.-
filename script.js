@@ -36,26 +36,26 @@ const WORD_BANK = [
 ];
 
 const PREMIUM_AVATARS = [
-  // --- Happy & Stylish Males ---
-  "https://api.dicebear.com/7.x/micah/svg?seed=Kingston&mouth=smile&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Jaxon&mouth=happy&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver&mouth=smile&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Ryder&mouth=smile&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Amir&mouth=happy&backgroundColor=a855f7",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&mouth=smile&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Kai&mouth=smile&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Maddox&mouth=happy&backgroundColor=2ecc87",
+  // --- Stylish & Happy Males ---
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&top=shortHairShortWaved&accessories=sunglasses&mouth=smile&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jaxon&top=shortHairDreads01&clothing=hoodie&mouth=smile&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver&top=hat&accessories=wayfarers&mouth=smile&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ryder&top=shortHairTheCaesarSidePart&clothing=collarAndSweater&mouth=smile&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Amir&top=winterHat2&accessories=round&mouth=smile&backgroundColor=a855f7",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&top=shortHairSides&accessories=prescription02&mouth=smile&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Kai&top=shortHairFrizzle&clothing=graphicShirt&mouth=smile&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Maddox&top=shortHairShortFlat&accessories=kurt&mouth=smile&backgroundColor=2ecc87",
 
-  // --- Happy & Stylish Females ---
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Nyla&mouth=happy&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Zuri&mouth=smile&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&mouth=smile&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Amara&mouth=happy&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Cleo&mouth=smile&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&mouth=smile&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Sienna&mouth=happy&backgroundColor=a855f7",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Nova&mouth=smile&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ruby&mouth=smile&backgroundColor=2ecc87"
+  // --- Stylish & Happy Females ---
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Nyla&top=longHairFrida&accessories=sunglasses&mouth=smile&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zuri&top=longHairFroBand&clothing=overall&mouth=smile&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&top=longHairBun&accessories=round&mouth=smile&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Amara&top=longHairMiaWallace&accessories=prescription01&mouth=smile&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Cleo&top=longHairCurly&accessories=wayfarers&mouth=smile&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&top=hijab&accessories=sunglasses&mouth=smile&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sienna&top=longHairNotTooLong&clothing=blazerAndShirt&mouth=smile&backgroundColor=a855f7",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Nova&top=longHairDreads&accessories=kurt&mouth=smile&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ruby&top=longHairStraightStrand&clothing=hoodie&mouth=smile&backgroundColor=2ecc87"
 ];
 let S = {
   avatarIdx: 0, playerName: '', 
