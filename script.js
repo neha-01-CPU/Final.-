@@ -36,30 +36,10 @@ const WORD_BANK = [
 ];
 
 const PREMIUM_AVATARS = [
-  "https://api.dicebear.com/7.x/micah/svg?seed=Liam&backgroundColor=b6e3f4",     
-  "https://api.dicebear.com/7.x/micah/svg?seed=Olivia&backgroundColor=ffd5dc",   
-  "https://api.dicebear.com/7.x/micah/svg?seed=Noah&backgroundColor=d1d4f9",     
-  "https://api.dicebear.com/7.x/micah/svg?seed=Emma&backgroundColor=ffdfbf",     
-  "https://api.dicebear.com/7.x/micah/svg?seed=Oliver&backgroundColor=c0aede",   
-  "https://api.dicebear.com/7.x/micah/svg?seed=Ava&backgroundColor=b4e4c4",      
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=James&backgroundColor=ffdfbf",  
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Isabella&backgroundColor=b6e3f4",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=William&backgroundColor=b4e4c4",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Mia&backgroundColor=ffd5dc",    
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Benjamin&backgroundColor=d1d4f9",
-  "https://api.dicebear.com/7.x/lorelei/svg?seed=Amelia&backgroundColor=c0aede", 
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Lucas&backgroundColor=c0aede",
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Harper&backgroundColor=ffdfbf",
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Henry&backgroundColor=b6e3f4",
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Evelyn&backgroundColor=d1d4f9",
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Alexander&backgroundColor=ffd5dc",
-  "https://api.dicebear.com/7.x/adventurer/svg?seed=Abigail&backgroundColor=b4e4c4",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Daniel&backgroundColor=b4e4c4",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily&backgroundColor=c0aede",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Matthew&backgroundColor=ffdfbf",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Elizabeth&backgroundColor=b6e3f4",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jackson&backgroundColor=d1d4f9",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Sofia&backgroundColor=ffd5dc" 
+   "1777603074761(1).png",
+   "1777603074761(2).png,
+   "1777603074761(3).png,
+   "1777603074761(4).png, 
 ];
 
 let S = {
