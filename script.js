@@ -36,10 +36,21 @@ const WORD_BANK = [
 ];
 
 const PREMIUM_AVATARS = [
-   "/1777603074761(1).png",
-   "/1777603074761(2).png,
-   "/1777603074761(3).png,
-   "/1777603074761(4).png, 
+  "https://api.dicebear.com/7.x/personas/svg?seed=Felix&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/personas/svg?seed=Aneka&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/personas/svg?seed=Jasper&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/personas/svg?seed=Luna&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/personas/svg?seed=Milo&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/personas/svg?seed=Aria&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Chase&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Leo&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Zoe&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Max&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Jack&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Ruby&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/adventurer/svg?seed=Sam&backgroundColor=4a8fe8"
 ];
 
 let S = {
