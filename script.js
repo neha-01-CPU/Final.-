@@ -36,26 +36,26 @@ const WORD_BANK = [
 ];
 
 const PREMIUM_AVATARS = [
-  // --- Modern Males (Guaranteed to Load) ---
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Noah&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=James&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Felix&backgroundColor=a855f7",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Alex&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Ryan&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/personas/svg?seed=Zane&backgroundColor=2ecc87",
+  // --- Happy Males ---
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver&mouth=smile&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Jack&mouth=smile&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Noah&mouth=smile&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=James&mouth=smile&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Felix&mouth=smile&backgroundColor=a855f7",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Alex&mouth=smile&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Ryan&mouth=smile&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/personas/svg?seed=Zane&mouth=smile&backgroundColor=2ecc87",
 
-  // --- Modern Females (Guaranteed to Load) ---
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily&backgroundColor=4a8fe8",
-  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ruby&backgroundColor=2ecc87",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Zoe&backgroundColor=ec4899",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Chloe&backgroundColor=f0525e",
-  "https://api.dicebear.com/7.x/micah/svg?seed=Ava&backgroundColor=a855f7",
-  "https://api.dicebear.com/7.x/personas/svg?seed=Ella&backgroundColor=f4b942",
-  "https://api.dicebear.com/7.x/personas/svg?seed=Maya&backgroundColor=2ecc87"
+  // --- Happy Females ---
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Aria&mouth=smile&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Mia&mouth=smile&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Lily&mouth=smile&backgroundColor=4a8fe8",
+  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ruby&mouth=smile&backgroundColor=2ecc87",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Zoe&mouth=smile&backgroundColor=ec4899",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Chloe&mouth=smile&backgroundColor=f0525e",
+  "https://api.dicebear.com/7.x/micah/svg?seed=Ava&mouth=smile&backgroundColor=a855f7",
+  "https://api.dicebear.com/7.x/personas/svg?seed=Ella&mouth=smile&backgroundColor=f4b942",
+  "https://api.dicebear.com/7.x/personas/svg?seed=Maya&mouth=smile&backgroundColor=2ecc87"
 ];
 let S = {
   avatarIdx: 0, playerName: '', 
